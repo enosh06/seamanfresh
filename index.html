@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/seaman-fresh-final/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seaman Fresh INC | Premium Seafood Online</title>
+
+  <!-- Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+  <script type="module" crossorigin src="/seaman-fresh-final/assets/index-G15lFc1y.js"></script>
+  <link rel="stylesheet" crossorigin href="/seaman-fresh-final/assets/index-rq48CUuM.css">
+</head>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ocean: {
+            DEFAULT: '#0077B6',
+            dark: '#023E8A',
+            light: '#48CAE4',
+            lightest: '#90E0EF',
+          },
+          midnight: '#0B0B0B',
+          surface: '#F6F8FA',
+          accent: {
+            DEFAULT: '#FF9F1C',
+            hover: '#FB8500'
+          }
+        },
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          display: ['Poppins', 'sans-serif'],
+        },
+        animation: {
+          'fade-in': 'fadeIn 0.5s ease-out',
+          'fload': 'float 3s ease-in-out infinite',
+        },
+        keyframes: {
+          fadeIn: {
+            '0%': { opacity: '0', transform: 'translateY(10px)' },
+            '100%': { opacity: '1', transform: 'translateY(0)' },
+          },
+          float: {
+            '0%, 100%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(-10px)' },
+          }
+        }
+      },
+    },
+  }
+</script>
+
+<body>
+  <div id="root"></div>
+</body>
+
+</html>
