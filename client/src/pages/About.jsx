@@ -3,7 +3,7 @@ import { Anchor, Users, Globe, Award } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 const About = () => {
-    const { t } = useLanguage();
+    useLanguage();
 
     return (
         <div className="bg-surface min-h-screen">

@@ -24,6 +24,10 @@ const PrivateRoute = ({ children }) => {
   );
 };
 
+import FixedPanelLink from './components/FixedPanelLink';
+
+// ... (existing code)
+
 function App() {
   return (
     <AuthProvider>
@@ -36,6 +40,7 @@ function App() {
             <Route path="/orders" element={<PrivateRoute><Orders /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
+          <FixedPanelLink />
         </React.Suspense>
       </Router>
     </AuthProvider>

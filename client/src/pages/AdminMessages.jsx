@@ -20,21 +20,21 @@ const AdminMessages = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const fetchMessages = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/messages', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setMessages(res.data);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching messages:', error);
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get('http://localhost:5000/api/messages', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setMessages(res.data);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+                setLoading(false);
+            }
+        };
+
         fetchMessages();
     }, []);
 

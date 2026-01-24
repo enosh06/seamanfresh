@@ -6,7 +6,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useCart } from '../context/CartContext';
 import { useUserType } from '../context/UserTypeContext';
-import { ArrowRight, Star, Globe, ShieldCheck, Truck, Sparkles, ShoppingCart, Users, Building2, CheckCircle, Award, Clock, Package, Quote, X } from 'lucide-react';
+import { ArrowRight, Star, Globe, ShieldCheck, Truck, Sparkles, ShoppingCart, Users, Building2, Quote, X, CheckCircle, Award } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Home = () => {
     const [products, setProducts] = useState([]);
@@ -31,9 +32,8 @@ const Home = () => {
         };
         fetchProducts();
 
-        // Show user type modal if not set
         if (!userType) {
-            setTimeout(() => setShowUserTypeModal(true), 1000);
+            setTimeout(() => setShowUserTypeModal(true), 1500);
         }
     }, [userType]);
 
@@ -45,206 +45,304 @@ const Home = () => {
     const recommendedProducts = products.slice(0, 3);
     const featuredProducts = products.slice(0, 8);
 
+    const fadeInUp = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+    };
+
+    const staggerContainer = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2
+            }
+        }
+    };
+
     return (
-        <div className="font-sans text-midnight bg-surface min-h-screen">
+        <div className="font-sans text-slate-900 bg-gray-50 min-h-screen overflow-x-hidden">
 
             {/* User Type Selection Modal */}
-            {showUserTypeModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-2xl w-full p-8 relative">
-                        <button
-                            onClick={() => setShowUserTypeModal(false)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            <AnimatePresence>
+                {showUserTypeModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white rounded-3xl max-w-2xl w-full p-8 relative shadow-2xl"
                         >
-                            <X size={24} />
-                        </button>
-
-                        <h2 className="text-3xl font-bold font-display text-midnight mb-4 text-center">
-                            Welcome to <span className="text-ocean">SeamanFresh</span>
-                        </h2>
-                        <p className="text-gray-600 text-center mb-8">Choose your shopping preference to get the best prices</p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <button
-                                onClick={() => handleUserTypeSelect('retail')}
-                                className="group p-8 border-2 border-gray-200 rounded-2xl hover:border-ocean hover:bg-ocean/5 transition-all"
+                                onClick={() => setShowUserTypeModal(false)}
+                                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
                             >
-                                <Users className="text-ocean mx-auto mb-4" size={48} />
-                                <h3 className="text-2xl font-bold text-midnight mb-2">Retail</h3>
-                                <p className="text-gray-600 mb-4">Perfect for individuals and small families</p>
-                                <div className="bg-surface px-4 py-2 rounded-lg">
-                                    <span className="text-sm text-gray-500">Standard Pricing</span>
-                                </div>
+                                <X size={24} />
                             </button>
 
-                            <button
-                                onClick={() => handleUserTypeSelect('wholesale')}
-                                className="group p-8 border-2 border-ocean bg-ocean/5 rounded-2xl hover:bg-ocean/10 transition-all relative overflow-hidden"
-                            >
-                                <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                    20% OFF
-                                </div>
-                                <Building2 className="text-ocean mx-auto mb-4" size={48} />
-                                <h3 className="text-2xl font-bold text-midnight mb-2">Wholesale</h3>
-                                <p className="text-gray-600 mb-4">For restaurants, hotels & bulk buyers</p>
-                                <div className="bg-white px-4 py-2 rounded-lg border border-ocean">
-                                    <span className="text-sm font-bold text-ocean">20% Discount</span>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                            <h2 className="text-3xl font-bold font-display text-slate-900 mb-4 text-center">
+                                Welcome to <span className="text-sky-500">SeamanFresh</span>
+                            </h2>
+                            <p className="text-gray-600 text-center mb-8">Choose your shopping preference to get the best prices</p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => handleUserTypeSelect('retail')}
+                                    className="group p-8 border-2 border-gray-100 rounded-2xl hover:border-sky-500 hover:bg-sky-500/5 transition-all text-left"
+                                >
+                                    <Users className="text-sky-500 mb-4" size={48} />
+                                    <h3 className="text-2xl font-bold text-slate-900 mb-2">Retail</h3>
+                                    <p className="text-gray-600 mb-4">Perfect for individuals and small families</p>
+                                    <div className="bg-gray-50 px-4 py-2 rounded-lg inline-block">
+                                        <span className="text-sm text-gray-500 font-medium">Standard Pricing</span>
+                                    </div>
+                                </motion.button>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => handleUserTypeSelect('wholesale')}
+                                    className="group p-8 border-2 border-sky-500 bg-sky-500/5 rounded-2xl hover:bg-sky-500/10 transition-all text-left relative overflow-hidden"
+                                >
+                                    <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg shadow-green-500/30">
+                                        20% OFF
+                                    </div>
+                                    <Building2 className="text-sky-500 mb-4" size={48} />
+                                    <h3 className="text-2xl font-bold text-slate-900 mb-2">Wholesale</h3>
+                                    <p className="text-gray-600 mb-4">For restaurants, hotels & bulk buyers</p>
+                                    <div className="bg-white px-4 py-2 rounded-lg border border-sky-500 inline-block">
+                                        <span className="text-sm font-bold text-sky-500">20% Discount</span>
+                                    </div>
+                                </motion.button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Hero Section */}
-            <section className="relative h-screen flex items-center overflow-hidden bg-gradient-to-br from-midnight via-[#003f63] to-ocean">
-                <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+            <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-slate-900 via-[#003f63] to-sky-500">
+                <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-                    <div className="max-w-3xl">
-                        <span className="inline-block py-1 px-3 rounded-full bg-ocean/20 border border-ocean/40 text-ocean-light font-semibold text-sm mb-6 animate-pulse">
-                            {isWholesale ? '🏢 Wholesale Pricing Active' : '🌍 Global Export Certified'}
-                        </span>
-                        <h1 className="text-5xl md:text-7xl font-display font-bold text-white leading-tight mb-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-20">
+                    <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        variants={staggerContainer}
+                        className="max-w-3xl"
+                    >
+                        <motion.span variants={fadeInUp} className="inline-flex items-center gap-2 py-1 px-4 rounded-full bg-white/10 border border-white/20 text-sky-400 font-semibold text-sm mb-6 backdrop-blur-md">
+                            {isWholesale ? <Building2 size={14} /> : <Globe size={14} />}
+                            {isWholesale ? 'Wholesale Pricing Active' : 'Global Export Certified'}
+                        </motion.span>
+                        <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white leading-tight mb-6">
                             {t('welcome')}
-                        </h1>
-                        <p className="text-xl text-gray-300 mb-10 font-light leading-relaxed max-w-2xl">
+                        </motion.h1>
+                        <motion.p variants={fadeInUp} className="text-xl text-gray-200 mb-10 font-light leading-relaxed max-w-2xl bg-black/20 p-4 rounded-xl backdrop-blur-sm border border-white/5">
                             From the pristine waters of the Pacific to your doorstep. We utilize AI-driven logistics to ensure
-                            <span className="text-ocean-light font-semibold"> 24-hour delivery</span> anywhere in the world.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <Link to="/products" className="group px-8 py-4 bg-ocean hover:bg-white hover:text-ocean text-white font-bold rounded-full transition-all flex items-center justify-center gap-2 text-lg shadow-xl shadow-ocean/20">
+                            <span className="text-sky-400 font-semibold"> 24-hour delivery</span> anywhere in the world.
+                        </motion.p>
+                        <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
+                            <Link to="/products" className="btn btn-primary text-lg px-8 py-4 rounded-full">
                                 {t('order')}
-                                <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight className="w-5 h-5" />
                             </Link>
-                            <Link to="/about" className="px-8 py-4 border border-gray-600 text-gray-300 hover:border-white hover:text-white font-semibold rounded-full transition-all text-center">
+                            <Link to="/about" className="btn px-8 py-4 bg-white/10 text-white hover:bg-white/20 hover:backdrop-blur-lg border border-white/20 rounded-full font-semibold">
                                 {t('explore')}
                             </Link>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
 
-                <div className="absolute bottom-10 right-4 md:right-10 bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hidden md:block">
-                    <div className="flex gap-8">
+                <motion.div
+                    initial={{ x: 100, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
+                    className="absolute bottom-10 right-4 md:right-10 bg-white/10 backdrop-blur-xl p-8 rounded-3xl border border-white/20 hidden lg:block shadow-2xl"
+                >
+                    <div className="flex gap-12">
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-white">50+</div>
-                            <div className="text-xs text-ocean-light uppercase tracking-wider">Countries</div>
+                            <div className="text-4xl font-bold text-white mb-1">50+</div>
+                            <div className="text-xs text-sky-400 uppercase tracking-widest font-bold">Countries</div>
                         </div>
                         <div className="w-px bg-white/20"></div>
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-white">24h</div>
-                            <div className="text-xs text-ocean-light uppercase tracking-wider">Delivery</div>
+                            <div className="text-4xl font-bold text-white mb-1">24h</div>
+                            <div className="text-xs text-sky-400 uppercase tracking-widest font-bold">Delivery</div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </section>
 
             {/* Stats Section */}
             <section className="py-16 bg-white border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        <StatCard number="10K+" label="Happy Customers" />
-                        <StatCard number="50+" label="Countries Served" />
-                        <StatCard number="24/7" label="Customer Support" />
-                        <StatCard number="100%" label="Fresh Guarantee" />
-                    </div>
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                        className="grid grid-cols-2 md:grid-cols-4 gap-8"
+                    >
+                        <StatCard number="10K+" label="Happy Customers" delay={0.1} />
+                        <StatCard number="50+" label="Countries Served" delay={0.2} />
+                        <StatCard number="24/7" label="Customer Support" delay={0.3} />
+                        <StatCard number="100%" label="Fresh Guarantee" delay={0.4} />
+                    </motion.div>
                 </div>
             </section>
 
             {/* AI Recommendations */}
-            <section className="py-20 bg-white">
+            <section className="py-24 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-3 mb-10">
-                        <Sparkles className="text-ocean w-6 h-6" />
-                        <h2 className="text-2xl font-bold text-midnight tracking-tight">{t('rec')}</h2>
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-sky-500/10 rounded-2xl text-sky-500">
+                                <Sparkles className="w-8 h-8" />
+                            </div>
+                            <div>
+                                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{t('rec')}</h2>
+                                <p className="text-gray-500 mt-1">Curated specifically for your taste</p>
+                            </div>
+                        </div>
+                        <Link to="/products" className="text-sky-500 font-bold hover:text-sky-700 flex items-center gap-2 group">
+                            View All <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </Link>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {recommendedProducts.map((product, index) => (
-                            <div key={product.id} className="group relative bg-surface rounded-2xl p-4 transition-all hover:bg-ocean/5 border border-transparent hover:border-ocean/20">
-                                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full px-3 py-1 text-xs font-bold text-ocean shadow-sm z-10">
+                            <motion.div
+                                key={product.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                viewport={{ once: true }}
+                                className="group relative bg-white rounded-3xl p-4 transition-all hover:shadow-xl hover:shadow-ocean/10 border border-gray-100"
+                            >
+                                <div className="absolute top-6 right-6 bg-white/95 backdrop-blur rounded-full px-3 py-1 text-xs font-bold text-sky-500 shadow-lg z-10 border border-sky-500/10">
                                     {index === 0 ? 'Best Match 98%' : 'Trending'}
                                 </div>
-                                <div className="h-48 rounded-xl overflow-hidden mb-4">
+                                <div className="h-64 rounded-2xl overflow-hidden mb-5 relative">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                     <img
                                         src={product.image_url ? `${API_URL}${product.image_url}` : 'https://placehold.co/400x300?text=Seafood'}
                                         alt={product.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
-                                </div>
-                                <h3 className="font-bold text-lg mb-1 group-hover:text-ocean transition-colors">{product.name}</h3>
-                                <p className="text-gray-500 text-sm mb-4 line-clamp-2">Premium quality {product.category || 'seafood'} sourced directly.</p>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xl font-bold text-midnight">{formatPrice(product.price)}</span>
                                     <button
                                         onClick={() => handleAddToCart(product)}
-                                        className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-ocean hover:bg-ocean hover:text-white transition-all shadow-sm"
+                                        className="absolute bottom-4 right-4 z-20 bg-white text-sky-500 w-12 h-12 rounded-full flex items-center justify-center font-bold shadow-lg transform translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-sky-500 hover:text-white"
                                     >
-                                        <ShoppingCart size={18} />
+                                        <ShoppingCart size={20} />
                                     </button>
                                 </div>
-                            </div>
+                                <h3 className="font-bold text-xl mb-2 text-slate-900">{product.name}</h3>
+                                <p className="text-gray-500 text-sm mb-4 line-clamp-2">Premium quality {product.category || 'seafood'} sourced directly.</p>
+                                <div className="flex items-center justify-between border-t border-gray-50 pt-4">
+                                    <span className="text-2xl font-bold text-slate-900">{formatPrice(product.price)}</span>
+                                    <div className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
+                                        <Star size={14} fill="currentColor" /> 4.9
+                                    </div>
+                                </div>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
             </section>
 
             {/* Why Choose Us */}
-            <section className="py-20 bg-surface">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-bold font-display text-midnight mb-4">
-                            Why Choose <span className="text-ocean">SeamanFresh</span>
+            <section className="py-24 bg-white relative overflow-hidden">
+                <div className="absolute -left-20 top-20 w-96 h-96 bg-sky-500/5 rounded-full blur-3xl"></div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="text-center mb-16">
+                        <span className="text-sky-500 font-bold tracking-widest text-sm uppercase mb-3 block">Our Promise</span>
+                        <h2 className="text-4xl md:text-5xl font-display font-bold text-slate-900 mb-6">
+                            Why Choose <span className="text-sky-500">SeamanFresh</span>
                         </h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto">
+                        <p className="text-gray-600 max-w-2xl mx-auto text-lg">
                             We're committed to delivering the freshest seafood with unmatched quality and service
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <FeatureCard
-                            icon={<ShieldCheck className="w-12 h-12 text-ocean" />}
+                            icon={<ShieldCheck className="w-12 h-12 text-sky-500" />}
                             title="Quality Guaranteed"
                             description="100% fresh guarantee with rigorous quality checks at every step"
+                            delay={0.1}
                         />
                         <FeatureCard
-                            icon={<Truck className="w-12 h-12 text-ocean" />}
+                            icon={<Truck className="w-12 h-12 text-sky-500" />}
                             title="Fast Delivery"
                             description="24-hour cold-chain delivery to preserve freshness worldwide"
+                            delay={0.2}
                         />
                         <FeatureCard
-                            icon={<Award className="w-12 h-12 text-ocean" />}
+                            icon={<Award className="w-12 h-12 text-sky-500" />}
                             title="Certified Suppliers"
                             description="Partnered with certified fisheries following sustainable practices"
+                            delay={0.3}
                         />
                     </div>
                 </div>
             </section>
 
-            {/* How It Works */}
-            <section className="py-20 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-bold font-display text-midnight mb-4">
-                            How It Works
-                        </h2>
-                        <p className="text-gray-600">Simple steps to get fresh seafood delivered to your door</p>
-                    </div>
+            {/* Global Reach */}
+            <section className="py-32 bg-slate-900 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg')] bg-no-repeat bg-center bg-contain pointer-events-none"></div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                        <ProcessStep number="1" title="Browse" description="Explore our wide selection of fresh seafood" />
-                        <ProcessStep number="2" title="Order" description="Add items to cart and checkout securely" />
-                        <ProcessStep number="3" title="Pack" description="We carefully pack with cold-chain technology" />
-                        <ProcessStep number="4" title="Deliver" description="Receive fresh seafood at your doorstep" />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="grid md:grid-cols-2 gap-16 items-center">
+                        <motion.div
+                            initial={{ opacity: 0, x: -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                        >
+                            <span className="text-sky-400 font-bold tracking-widest uppercase text-sm mb-4 block">International Logistics</span>
+                            <h2 className="text-4xl md:text-6xl font-display font-bold text-white mb-8 leading-tight">
+                                Serving <span className="text-sky-500">120+ Cities</span> Worldwide
+                            </h2>
+                            <p className="text-gray-400 text-lg mb-8 leading-relaxed">
+                                Our verified supply chain spans across continents ensuring that you get the same premium quality whether you are in Tokyo, New York, or London.
+                            </p>
+                            <div className="flex gap-4">
+                                <button className="btn btn-primary">View Coverage Map</button>
+                                <button className="btn btn-outline border-white text-white hover:bg-white hover:text-slate-900">Contact Sales</button>
+                            </div>
+                        </motion.div>
+
+                        <div className="grid grid-cols-1 gap-6">
+                            <FeatureCard
+                                icon={<Globe className="w-8 h-8 text-sky-500" />}
+                                title="Global Tracking"
+                                desc="Real-time satellite tracking for every shipment from port to plate."
+                                dark
+                            />
+                            <FeatureCard
+                                icon={<Truck className="w-8 h-8 text-sky-500" />}
+                                title="Express Shipping"
+                                desc="Priority cold-chain logistics ensuring 24-hour delivery worldwide."
+                                dark
+                            />
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Testimonials */}
-            <section className="py-20 bg-ocean/5">
+            <section className="py-24 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-bold font-display text-midnight mb-4">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-5xl font-display font-bold text-slate-900 mb-4">
                             What Our Customers Say
                         </h2>
                     </div>
@@ -255,90 +353,22 @@ const Home = () => {
                             role="Restaurant Owner"
                             text="The quality is outstanding! My customers love the fresh seafood, and the wholesale pricing helps my business thrive."
                             rating={5}
+                            delay={0.1}
                         />
                         <TestimonialCard
                             name="Michael Chen"
                             role="Home Chef"
                             text="Fast delivery and always fresh. I've been ordering for months and never disappointed. Highly recommend!"
                             rating={5}
+                            delay={0.2}
                         />
                         <TestimonialCard
                             name="Emma Williams"
                             role="Hotel Manager"
                             text="Reliable supplier with consistent quality. The 24-hour delivery is a game-changer for our kitchen operations."
                             rating={5}
+                            delay={0.3}
                         />
-                    </div>
-                </div>
-            </section>
-
-            {/* Global Reach */}
-            <section className="py-24 bg-midnight relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg')] bg-no-repeat bg-center bg-contain pointer-events-none"></div>
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-                    <span className="text-ocean-light font-bold tracking-widest uppercase text-sm mb-4 block">International Logistics</span>
-                    <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-12">
-                        Serving <span className="text-ocean">120+ Cities</span> Worldwide
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-                        <FeatureCard
-                            icon={<Globe className="w-8 h-8 text-ocean" />}
-                            title="Global Tracking"
-                            desc="Real-time satellite tracking for every shipment from port to plate."
-                        />
-                        <FeatureCard
-                            icon={<Truck className="w-8 h-8 text-ocean" />}
-                            title="Express Shipping"
-                            desc="Priority cold-chain logistics ensuring 24-hour delivery worldwide."
-                        />
-                        <FeatureCard
-                            icon={<ShieldCheck className="w-8 h-8 text-ocean" />}
-                            title="Quality Assurance"
-                            desc="Temperature-controlled packaging with freshness guaranteed."
-                        />
-                    </div>
-                </div>
-            </section>
-
-            {/* Featured Products */}
-            <section className="py-24 bg-surface">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-3xl font-display font-bold text-midnight mb-12 text-center">Global Favorites</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {featuredProducts.map(product => (
-                            <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-ocean/10 transition-all duration-300">
-                                <div className="h-64 overflow-hidden relative group">
-                                    <img
-                                        src={product.image_url ? `${API_URL}${product.image_url}` : 'https://placehold.co/400x300?text=Fish'}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                    />
-                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <Link to={`/product/${product.id}`} className="bg-white text-midnight font-bold px-6 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                                            View Details
-                                        </Link>
-                                    </div>
-                                </div>
-                                <div className="p-6">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-bold text-lg text-midnight">{product.name}</h3>
-                                        <div className="flex items-center gap-1 text-yellow-400 text-xs font-bold">
-                                            <Star size={12} fill="currentColor" /> 4.9
-                                        </div>
-                                    </div>
-                                    <p className="text-ocean font-bold text-xl mb-4">{formatPrice(product.price)} <span className="text-sm text-gray-400 font-normal">/ kg</span></p>
-                                    <button
-                                        onClick={() => handleAddToCart(product)}
-                                        className="w-full py-3 border border-ocean text-ocean font-bold rounded-xl hover:bg-ocean hover:text-white transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        <ShoppingCart size={18} />
-                                        Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
                     </div>
                 </div>
             </section>
@@ -346,48 +376,61 @@ const Home = () => {
     );
 };
 
-// Sub-components
-const StatCard = ({ number, label }) => (
-    <div className="text-center">
-        <div className="text-4xl font-bold text-ocean mb-2">{number}</div>
-        <div className="text-gray-600 font-medium">{label}</div>
-    </div>
+// Sub-components with animations
+const StatCard = ({ number, label, delay }) => (
+    <motion.div
+        variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay } }
+        }}
+        className="text-center group cursor-default"
+    >
+        <div className="text-4xl md:text-5xl font-bold text-sky-500 mb-2 group-hover:scale-110 transition-transform duration-300">{number}</div>
+        <div className="text-gray-600 font-medium tracking-wide uppercase text-sm">{label}</div>
+    </motion.div>
 );
 
-const FeatureCard = ({ icon, title, desc, description }) => (
-    <div className="bg-white/5 backdrop-blur border border-white/10 p-8 rounded-2xl hover:bg-white/10 transition-colors">
-        <div className="bg-ocean/20 w-14 h-14 rounded-full flex items-center justify-center mb-6">
+const FeatureCard = ({ icon, title, desc, description, delay, dark }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay }}
+        className={`${dark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-100 hover:shadow-xl hover:shadow-ocean/5'} border p-8 rounded-3xl transition-all duration-300`}
+    >
+        <div className="bg-sky-500/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-sky-500">
             {icon}
         </div>
-        <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
-        <p className="text-gray-400 leading-relaxed">{desc || description}</p>
-    </div>
+        <h3 className={`text-xl font-bold mb-3 ${dark ? 'text-white' : 'text-slate-900'}`}>{title}</h3>
+        <p className={`${dark ? 'text-gray-400' : 'text-gray-500'} leading-relaxed`}>{desc || description}</p>
+    </motion.div>
 );
 
-const ProcessStep = ({ number, title, description }) => (
-    <div className="text-center">
-        <div className="w-16 h-16 bg-ocean text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-            {number}
-        </div>
-        <h3 className="text-lg font-bold text-midnight mb-2">{title}</h3>
-        <p className="text-gray-600 text-sm">{description}</p>
-    </div>
-);
-
-const TestimonialCard = ({ name, role, text, rating }) => (
-    <div className="bg-white p-8 rounded-2xl shadow-sm">
-        <Quote className="text-ocean/20 mb-4" size={40} />
-        <p className="text-gray-700 mb-6 leading-relaxed">"{text}"</p>
-        <div className="flex items-center gap-1 mb-4">
+const TestimonialCard = ({ name, role, text, rating, delay }) => (
+    <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay }}
+        className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 relative group"
+    >
+        <Quote className="text-sky-500/10 absolute top-8 right-8 group-hover:text-sky-500/20 transition-colors" size={60} />
+        <div className="flex items-center gap-1 mb-6">
             {[...Array(rating)].map((_, i) => (
-                <Star key={i} size={16} fill="#FFA500" className="text-yellow-400" />
+                <Star key={i} size={18} fill="#FFB703" className="text-[#FFB703]" />
             ))}
         </div>
-        <div>
-            <div className="font-bold text-midnight">{name}</div>
-            <div className="text-sm text-gray-500">{role}</div>
+        <p className="text-gray-700 mb-8 leading-relaxed text-lg italic">"{text}"</p>
+        <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-xl font-bold text-gray-400">
+                {name.charAt(0)}
+            </div>
+            <div>
+                <div className="font-bold text-slate-900">{name}</div>
+                <div className="text-sm text-gray-500">{role}</div>
+            </div>
         </div>
-    </div>
+    </motion.div>
 );
 
 export default Home;

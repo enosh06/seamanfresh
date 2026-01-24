@@ -7,15 +7,11 @@ const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-    const [cart, setCart] = useState([]);
-    const { isWholesale } = useUserType();
-
-    useEffect(() => {
+    const [cart, setCart] = useState(() => {
         const savedCart = localStorage.getItem('cart');
-        if (savedCart) {
-            setCart(JSON.parse(savedCart));
-        }
-    }, []);
+        return savedCart ? JSON.parse(savedCart) : [];
+    });
+    const { isWholesale } = useUserType();
 
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cart));

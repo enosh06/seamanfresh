@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Plus, Edit, Trash2, X, Upload, Package } from 'lucide-react';
 
@@ -12,14 +12,15 @@ const AdminProducts = () => {
     const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
 
-    const fetchProducts = async () => {
+    const fetchProducts = useCallback(async () => {
         const res = await axios.get('http://localhost:5000/api/products');
         setProducts(res.data);
-    };
+    }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchProducts();
-    }, []);
+    }, [fetchProducts]);
 
     const handleEdit = (product) => {
         setEditingProduct(product);

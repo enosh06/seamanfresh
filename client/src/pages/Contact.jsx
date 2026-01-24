@@ -30,7 +30,7 @@ const Contact = () => {
             });
             setStatus({ type: 'success', message: 'Message sent successfully! We will get back to you soon.' });
             setFormData({ ...formData, subject: '', message: '' });
-        } catch (error) {
+        } catch {
             setStatus({ type: 'error', message: 'Failed to send message. Please try again.' });
         } finally {
             setLoading(false);

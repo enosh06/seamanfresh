@@ -104,6 +104,13 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
+                {error && (
+                    <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6 flex items-center gap-2">
+                        <AlertCircle size={20} />
+                        {error}
+                    </div>
+                )}
+
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <StatCard
@@ -184,7 +191,7 @@ const AdminDashboard = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {recentOrders.map((order, idx) => (
+                                        {recentOrders.map((order) => (
                                             <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group">
                                                 <td className="px-6 py-4">
                                                     <span className="font-bold text-midnight group-hover:text-ocean transition-colors">#SF-{order.id}</span>
@@ -286,7 +293,7 @@ const AdminDashboard = () => {
                                 <button
                                     onClick={() => {
                                         const audio = new Audio('/notification.mp3');
-                                        audio.play().catch(e => alert("Audio blocked! Please interact with the page first."));
+                                        audio.play().catch(() => alert("Audio blocked! Please interact with the page first."));
                                     }}
                                     className="w-full py-2.5 bg-ocean/5 text-ocean border border-ocean/20 rounded-xl font-bold text-xs hover:bg-ocean/10 transition-colors flex items-center justify-center gap-2"
                                 >
@@ -354,9 +361,8 @@ const OrderStatusBadge = ({ status }) => {
 };
 
 const SmoothLineChart = ({ data }) => {
-    if (!data || data.length === 0) return <div className="h-full flex items-center justify-center text-gray-400 text-sm">No data available</div>;
-
     const [activeIndex, setActiveIndex] = useState(null);
+    if (!data || data.length === 0) return <div className="h-full flex items-center justify-center text-gray-400 text-sm">No data available</div>;
 
     // Normalize data
     const maxVal = Math.max(...data.map(d => Number(d.revenue)), 100) * 1.1;
@@ -367,7 +373,7 @@ const SmoothLineChart = ({ data }) => {
     });
 
     // Generate Bezier Path
-    const svgPath = (points, command) => {
+    const svgPath = (points) => {
         const d = points.reduce((acc, point, i, a) => {
             if (i === 0) return `M ${point.x},${point.y}`;
             const cps = controlPoint(a[i - 1], a[i - 2], point);
@@ -382,7 +388,6 @@ const SmoothLineChart = ({ data }) => {
         const p = previous || current;
         const n = next || current;
         const smoothing = 0.2;
-        const opp = reverse ? n : p;
         const x = current.x + (n.x - p.x) * smoothing * (reverse ? -1 : 1);
         const y = current.y + (n.y - p.y) * smoothing * (reverse ? -1 : 1);
         return { x, y };

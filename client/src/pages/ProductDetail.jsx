@@ -12,7 +12,7 @@ const ProductDetail = () => {
     const [quantity, setQuantity] = useState(1);
     const { addToCart } = useCart();
     const navigate = useNavigate();
-    const { isWholesale, formatPrice: userTypeFormatPrice } = useUserType();
+    const { isWholesale } = useUserType();
     const { formatPrice } = useCurrency();
     const [error, setError] = useState('');
 

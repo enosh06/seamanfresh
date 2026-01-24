@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Package, MapPin, Clock, CheckCircle, XCircle, Truck, Trash2 } from 'lucide-react';
 
 const AdminOrders = () => {
     const [orders, setOrders] = useState([]);
 
-    const fetchOrders = async () => {
+    const fetchOrders = useCallback(async () => {
         const token = localStorage.getItem('token');
         const res = await axios.get('http://localhost:5000/api/orders', {
             headers: { Authorization: `Bearer ${token}` }
         });
         setOrders(res.data);
-    };
+    }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchOrders();
-    }, []);
+    }, [fetchOrders]);
 
     const updateStatus = async (id, status) => {
         const token = localStorage.getItem('token');

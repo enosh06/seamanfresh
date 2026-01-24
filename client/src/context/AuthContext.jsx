@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import api from '../api/axios';
 
 const AuthContext = createContext();
@@ -6,18 +6,12 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
+    const [user, setUser] = useState(() => {
         const token = localStorage.getItem('token');
-        if (token) {
-            // In a real app, we might verify the token here
-            const userData = JSON.parse(localStorage.getItem('user'));
-            setUser(userData);
-        }
-        setLoading(false);
-    }, []);
+        const savedUser = localStorage.getItem('user');
+        return (token && savedUser) ? JSON.parse(savedUser) : null;
+    });
+    const [loading, setLoading] = useState(false);
 
     const login = async (email, password) => {
         // Errors are now thrown by axios and caught in the component

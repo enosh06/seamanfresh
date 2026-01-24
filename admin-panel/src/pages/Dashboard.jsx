@@ -61,29 +61,7 @@ const Dashboard = () => {
 
     if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading dashboard...</div>;
 
-    const StatCard = ({ title, value, icon: Icon, color, bg, to }) => {
-        const Content = (
-            <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '24px', borderLeft: `4px solid ${color}`, height: '100%', transition: 'transform 0.2s', cursor: to ? 'pointer' : 'default' }}>
-                <div style={{
-                    background: bg,
-                    padding: '16px',
-                    borderRadius: '16px',
-                    color: color,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}>
-                    <Icon size={32} strokeWidth={1.5} />
-                </div>
-                <div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>{title}</p>
-                    <h2 style={{ fontSize: '32px', margin: 0, color: 'var(--primary)' }}>{value}</h2>
-                </div>
-            </div>
-        );
 
-        return to ? <Link to={to} style={{ textDecoration: 'none', color: 'inherit' }}>{Content}</Link> : Content;
-    };
 
     return (
         <div>
@@ -250,7 +228,7 @@ const Dashboard = () => {
                         <button
                             onClick={() => {
                                 const audio = new Audio('/notification.mp3');
-                                audio.play().catch(e => alert("Audio blocked! Please interact with the page first."));
+                                audio.play().catch(() => alert("Audio blocked! Please interact with the page first."));
                             }}
                             className="btn"
                             style={{ width: '100%', background: 'rgba(14, 165, 233, 0.1)', color: 'var(--accent)' }}
@@ -262,6 +240,31 @@ const Dashboard = () => {
             </div>
         </div>
     );
+};
+
+// eslint-disable-next-line no-unused-vars
+const StatCard = ({ title, value, icon: Icon, color, bg, to }) => {
+    const Content = (
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '24px', borderLeft: `4px solid ${color}`, height: '100%', transition: 'transform 0.2s', cursor: to ? 'pointer' : 'default' }}>
+            <div style={{
+                background: bg,
+                padding: '16px',
+                borderRadius: '16px',
+                color: color,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                <Icon size={32} strokeWidth={1.5} />
+            </div>
+            <div>
+                <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>{title}</p>
+                <h2 style={{ fontSize: '32px', margin: 0, color: 'var(--primary)' }}>{value}</h2>
+            </div>
+        </div>
+    );
+
+    return to ? <Link to={to} style={{ textDecoration: 'none', color: 'inherit' }}>{Content}</Link> : Content;
 };
 
 export default Dashboard;

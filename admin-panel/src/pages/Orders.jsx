@@ -40,7 +40,7 @@ const Orders = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchOrders();
-        } catch (err) {
+        } catch {
             alert('Failed to update status');
         }
     };
@@ -56,7 +56,8 @@ const Orders = () => {
         }
     };
 
-    if (loading) return <div>Loading orders...</div>;
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         if (!loading && orders.length > 0) {
@@ -75,8 +76,7 @@ const Orders = () => {
         }
     }, [loading, orders]);
 
-    const [selectedOrder, setSelectedOrder] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+    if (loading) return <div>Loading orders...</div>;
 
     const viewOrderDetails = async (id) => {
         try {
