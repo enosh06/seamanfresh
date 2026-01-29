@@ -20,10 +20,17 @@ const Login = () => {
         } catch (err) {
             console.error('Login error:', err);
             // Show specific message from backend if available
-            if (err.response && err.response.data && err.response.data.message) {
-                setError(err.response.data.message);
+            if (err.response && err.response.data) {
+                // If the backend sends detailed error info (which we added for 500s), show it.
+                if (err.response.data.error) {
+                    setError(`System Error: ${err.response.data.error}`);
+                } else if (err.response.data.message) {
+                    setError(err.response.data.message);
+                } else {
+                    setError('An unexpected error occurred.');
+                }
             } else {
-                setError('Invalid email or password. Please try again.');
+                setError('Network error. Please check your connection.');
             }
         }
     };
