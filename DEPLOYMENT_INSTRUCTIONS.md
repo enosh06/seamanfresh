@@ -20,7 +20,12 @@ Ensure (or create) accounts for:
 1. **Create Cluster**: 
    - Log in to TiDB Cloud and create a "Serverless" Tier cluster (free).
    - Note the **Connection Details**: Host, Port (usually 4000), User, Password.
-   - *Note: Ensure you allow traffic from "Anywhere" (0.0.0.0/0) or specifically from Render IPs if possible (0.0.0.0/0 is easiest for serverless).*
+   - **CRITICAL**: You MUST configure the **IP Access List**:
+     1. Go to your Cluster overview.
+     2. Look for "IP Access List" or "Security Settings".
+     3. Click "Edit" or "Add".
+     4. Add `0.0.0.0/0` to allow connections from anywhere (this is required for Render).
+     5. *If you don't do this, you will get a "Host not allowed to connect" error.*
 
 2. **Initialize Database**:
    - Use a SQL client (like DBeaver, MySQL Workbench) or the TiDB Cloud SQL Editor.
