@@ -29,6 +29,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/setup', require('./routes/setup'));
 
 app.get('/', (req, res) => {
     res.send('Seaman Fresh API is running...');
