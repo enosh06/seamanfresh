@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { Bell, AlertCircle } from 'lucide-react';
-import API_URL from '../config';
 
 const NotificationSound = () => {
     const { user } = useAuth();
@@ -20,13 +19,10 @@ const NotificationSound = () => {
         // Initial Fetch to set baseline
         const init = async () => {
             try {
-                const token = localStorage.getItem('admin_token');
-                const res = await axios.get(`${API_URL}/api/orders?_t=${Date.now()}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (res.data && res.data.length > 0) {
-                    lastOrderIdRef.current = Number(res.data[0].id);
-                    console.log("AdminPanelNotification: Initialized with Order ID:", lastOrderIdRef.current);
+                const res = await api.get(`/orders?_t=${Date.now()}`);
+                if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+                    lastOrderIdRef.current = Math.max(...res.data.map(o => Number(o.id)));
+                    console.log("AdminPanelNotification: Initialized with Max Order ID:", lastOrderIdRef.current);
                 } else {
                     lastOrderIdRef.current = 0;
                 }
@@ -39,20 +35,18 @@ const NotificationSound = () => {
         // Polling Interval
         const poll = setInterval(async () => {
             try {
-                const token = localStorage.getItem('admin_token');
-                const res = await axios.get(`${API_URL}/api/orders?limit=1&_t=${Date.now()}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await api.get(`/orders?_t=${Date.now()}`); // Fetch current list (backend likely ignores limit or sorts variably)
 
-                if (res.data && res.data.length > 0) {
-                    const latestId = Number(res.data[0].id);
+                if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+                    // Robustly find the true latest ID regardless of sort order
+                    const maxId = Math.max(...res.data.map(o => Number(o.id)));
                     const currentId = Number(lastOrderIdRef.current);
 
                     // Only trigger if we have a valid baseline AND a STRICTLY NEWER order
-                    if (currentId > 0 && latestId > currentId) {
-                        console.log(`🔔 NEW ORDER: ${latestId} (Last: ${currentId})`);
+                    if (currentId > 0 && maxId > currentId) {
+                        console.log(`🔔 NEW ORDER DETECTED: ${maxId} (Previous Max: ${currentId})`);
 
-                        lastOrderIdRef.current = latestId;
+                        lastOrderIdRef.current = maxId;
 
                         // 1. Play Sound
                         const audio = audioRef.current;
@@ -63,25 +57,25 @@ const NotificationSound = () => {
                         window.dispatchEvent(new Event('orderUpdated'));
 
                         // 3. Show Visual Toast
-                        setToast({ id: latestId });
+                        setToast({ id: maxId });
                         setTimeout(() => setToast(null), 8000);
 
                         // 4. Browser Notification
                         if ("Notification" in window && Notification.permission === "granted") {
                             new Notification("New Order Received!", {
-                                body: `Order #SF-${latestId} placed successfully.`,
+                                body: `Order #SF-${maxId} placed successfully.`,
                                 icon: '/favicon.ico'
                             });
                         }
                     } else if (currentId === 0) {
                         // First sync
-                        lastOrderIdRef.current = latestId;
+                        lastOrderIdRef.current = maxId;
                     }
                 }
             } catch (err) {
                 console.error("Polling error:", err);
             }
-        }, 3000); // Check every 3 seconds
+        }, 2000); // Check every 2 seconds
 
         return () => clearInterval(poll);
     }, [user]);

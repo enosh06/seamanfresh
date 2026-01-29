@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle, AlertCircle, Waves } from 'lucide-react';
-import axios from 'axios';
+import api from '../api/axios';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -14,7 +14,7 @@ const ForgotPassword = () => {
         setLoading(true);
 
         try {
-            await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+            await api.post('/auth/forgot-password', { email });
             setMessage({
                 type: 'success',
                 text: 'Password reset instructions have been sent to your email!'
@@ -64,8 +64,8 @@ const ForgotPassword = () => {
 
                     {message.text && (
                         <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${message.type === 'success'
-                                ? 'bg-green-50 border border-green-200 text-green-700'
-                                : 'bg-red-50 border border-red-200 text-red-600'
+                            ? 'bg-green-50 border border-green-200 text-green-700'
+                            : 'bg-red-50 border border-red-200 text-red-600'
                             }`}>
                             {message.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
                             <span className="font-semibold text-sm">{message.text}</span>

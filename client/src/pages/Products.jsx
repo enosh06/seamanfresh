@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
+import API_URL from '../config';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Search, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -15,7 +16,7 @@ const Products = () => {
 
     useEffect(() => {
         const fetchProducts = async () => {
-            const res = await axios.get('http://localhost:5000/api/products');
+            const res = await api.get('/products');
             setProducts(res.data);
         };
         fetchProducts();
@@ -60,7 +61,7 @@ const Products = () => {
                         <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-ocean/10 transition-all duration-300 group">
                             <Link to={`/product/${product.id}`} className="block relative overflow-hidden h-64">
                                 <img
-                                    src={product.image_url ? `http://localhost:5000${product.image_url}` : 'https://placehold.co/400x300?text=Fish'}
+                                    src={product.image_url ? `${API_URL}${product.image_url}` : 'https://placehold.co/400x300?text=Fish'}
                                     alt={product.name}
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                 />
@@ -98,8 +99,26 @@ const Products = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <span className="text-ocean font-bold text-2xl">${userTypeFormatPrice(product.price)}</span>
-                                                <span className="text-gray-400 text-sm ml-1">/ kg</span>
+                                                {product.discount_percent > 0 ? (
+                                                    <div className="flex flex-col">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-gray-400 text-sm line-through">${userTypeFormatPrice(product.price)}</span>
+                                                            <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">-{product.discount_percent}%</span>
+                                                        </div>
+                                                        <div className="flex items-baseline gap-1">
+                                                            <span className="text-ocean font-bold text-2xl">
+                                                                ${(parseFloat(product.price) * (1 - product.discount_percent / 100)).toFixed(2)}
+                                                            </span>
+                                                            <span className="text-gray-400 text-sm">/ kg</span>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span className="text-ocean font-bold text-2xl">${userTypeFormatPrice(product.price)}</span>
+                                                        <span className="text-gray-400 text-sm ml-1">/ kg</span>
+                                                    </>
+                                                )}
+
                                                 {isWholesale && (
                                                     <div className="text-xs text-green-600 font-semibold mt-1">💰 20% Wholesale Discount</div>
                                                 )}

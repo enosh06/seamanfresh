@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 const AdminNotificationSound = () => {
     const { user } = useAuth();
-    const [lastOrderId, setLastOrderId] = useState(null);
-    const audioRef = useRef(new Audio('/notification.mp3'));
+    const lastOrderIdRef = useRef(null);
+    const audioRef = useRef(new Audio(`${import.meta.env.BASE_URL}notification.mp3`));
 
     useEffect(() => {
         if (!user || user.role !== 'admin') return;
@@ -16,14 +16,11 @@ const AdminNotificationSound = () => {
         // Initialize lastOrderId on first load
         const initLastOrder = async () => {
             try {
-                const token = localStorage.getItem('token');
-                const res = await axios.get('http://localhost:5000/api/orders', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (res.data && res.data.length > 0) {
-                    setLastOrderId(res.data[0].id);
+                const res = await api.get('/orders');
+                if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+                    lastOrderIdRef.current = Math.max(...res.data.map(o => o.id));
                 } else {
-                    setLastOrderId(0);
+                    lastOrderIdRef.current = 0;
                 }
             } catch (err) {
                 console.error("Error initializing orders", err);
@@ -34,31 +31,29 @@ const AdminNotificationSound = () => {
 
         const pollOrders = setInterval(async () => {
             try {
-                const token = localStorage.getItem('token');
-                const res = await axios.get('http://localhost:5000/api/orders', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await api.get('/orders');
 
-                if (res.data && res.data.length > 0) {
-                    const latestId = res.data[0].id;
-                    console.log(`Checking orders: Latest ID ${latestId}, Last Seen ${lastOrderId}`);
-                    if (lastOrderId !== null && latestId > lastOrderId) {
+                if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+                    const maxId = Math.max(...res.data.map(o => o.id));
+                    const currentId = lastOrderIdRef.current;
+
+                    if (currentId !== null && maxId > currentId) {
                         // Play alerting sound
-                        console.log(`New order detected (#SF-${latestId})! Playing notification...`);
+                        console.log(`New order detected (#SF-${maxId})! Playing notification...`);
                         const audio = audioRef.current;
                         audio.currentTime = 0;
                         audio.volume = 0.9;
                         audio.play().catch(e => console.warn("AdminNotification: Playback blocked:", e));
 
-                        setLastOrderId(latestId);
+                        lastOrderIdRef.current = maxId;
 
                         if ("Notification" in window && Notification.permission === "granted") {
                             new Notification("New Order Received!", {
-                                body: `Order #SF-${latestId} has just been placed.`,
+                                body: `Order #SF-${maxId} has just been placed.`,
                             });
                         }
-                    } else if (lastOrderId === null) {
-                        setLastOrderId(latestId);
+                    } else if (currentId === null) {
+                        lastOrderIdRef.current = maxId;
                     }
                 }
             } catch (err) {
@@ -67,7 +62,7 @@ const AdminNotificationSound = () => {
         }, 10000); // Poll every 10 seconds
 
         return () => clearInterval(pollOrders);
-    }, [user, lastOrderId]);
+    }, [user]);
 
     return null;
 };

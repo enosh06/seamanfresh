@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { Plus, Edit, Trash2, X, Upload, Ban, ArrowDown } from 'lucide-react';
+import api from '../api/axios';
 import API_URL from '../config';
+import { Plus, Edit, Trash2, X, Upload, Ban, ArrowDown } from 'lucide-react';
 
 const Products = () => {
     const [products, setProducts] = useState([]);
@@ -10,13 +10,13 @@ const Products = () => {
     const [editingProduct, setEditingProduct] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
-        name: '', description: '', price: '', category: 'Fresh Fish', stock_quantity: '', low_stock_threshold: '5'
+        name: '', description: '', price: '', category: 'Fresh Fish', stock_quantity: '', low_stock_threshold: '5', discount_percent: ''
     });
     const [image, setImage] = useState(null);
 
     const fetchProducts = async () => {
         try {
-            const res = await axios.get(`${API_URL}/api/products`);
+            const res = await api.get('/products');
             setProducts(res.data);
         } catch (err) {
             console.error(err);
@@ -30,7 +30,7 @@ const Products = () => {
         if (location.state?.openAddModal) {
             setShowModal(true);
             setEditingProduct(null);
-            setFormData({ name: '', description: '', price: '', category: 'Fresh Fish', stock_quantity: '', low_stock_threshold: '5' });
+            setFormData({ name: '', description: '', price: '', category: 'Fresh Fish', stock_quantity: '', low_stock_threshold: '5', discount_percent: '' });
             // Clear state so it doesn't reopen on refresh (optional but good practice)
             window.history.replaceState({}, document.title);
         }
@@ -44,7 +44,8 @@ const Products = () => {
             price: product.price,
             category: product.category,
             stock_quantity: product.stock_quantity,
-            low_stock_threshold: product.low_stock_threshold || 5
+            low_stock_threshold: product.low_stock_threshold || 5,
+            discount_percent: product.discount_percent || ''
         });
         setShowModal(true);
     };
@@ -53,10 +54,8 @@ const Products = () => {
         const lowVal = Math.max(0, (parseInt(threshold) || 5) - 1); // Set to 1 below threshold
         if (window.confirm(`Set stock to ${lowVal} (Low Stock) for testing?`)) {
             try {
-                const token = localStorage.getItem('admin_token');
-                await axios.patch(`${API_URL}/api/products/${id}/stock`,
-                    { stock_quantity: lowVal },
-                    { headers: { Authorization: `Bearer ${token}` } }
+                await api.patch(`/products/${id}/stock`,
+                    { stock_quantity: lowVal }
                 );
                 fetchProducts();
             } catch (err) {
@@ -70,10 +69,8 @@ const Products = () => {
         if (currentStock === 0) return; // Already out of stock
         if (window.confirm('Mark this product as Out of Stock?')) {
             try {
-                const token = localStorage.getItem('admin_token');
-                await axios.patch(`${API_URL}/api/products/${id}/stock`,
-                    { stock_quantity: 0 },
-                    { headers: { Authorization: `Bearer ${token}` } }
+                await api.patch(`/products/${id}/stock`,
+                    { stock_quantity: 0 }
                 );
                 fetchProducts();
             } catch (err) {
@@ -86,10 +83,7 @@ const Products = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
             try {
-                const token = localStorage.getItem('admin_token');
-                await axios.delete(`${API_URL}/api/products/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.delete(`/products/${id}`);
                 fetchProducts();
             } catch (err) {
                 console.error(err);
@@ -101,7 +95,6 @@ const Products = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        const token = localStorage.getItem('admin_token');
         const data = new FormData();
         Object.keys(formData).forEach(key => data.append(key, formData[key]));
         if (image) data.append('image', image);
@@ -111,17 +104,13 @@ const Products = () => {
                 if (!image && editingProduct.image_url) {
                     data.append('image_url', editingProduct.image_url);
                 }
-                await axios.put(`${API_URL}/api/products/${editingProduct.id}`, data, {
-                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
-                });
+                await api.put(`/products/${editingProduct.id}`, data);
             } else {
-                await axios.post(`${API_URL}/api/products`, data, {
-                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
-                });
+                await api.post('/products', data);
             }
             setShowModal(false);
             setEditingProduct(null);
-            setFormData({ name: '', description: '', price: '', category: 'Fresh Fish', stock_quantity: '', low_stock_threshold: '5' });
+            setFormData({ name: '', description: '', price: '', category: 'Fresh Fish', stock_quantity: '', low_stock_threshold: '5', discount_percent: '' });
             setImage(null);
             fetchProducts();
         } catch (err) {
@@ -140,7 +129,7 @@ const Products = () => {
                     <p style={{ color: 'var(--text-muted)', marginTop: '4px' }}>Manage your seafood catalog</p>
                 </div>
                 <button
-                    onClick={() => { setEditingProduct(null); setFormData({ name: '', description: '', price: '', category: 'Fresh Fish', stock_quantity: '', low_stock_threshold: '5' }); setShowModal(true); }}
+                    onClick={() => { setEditingProduct(null); setFormData({ name: '', description: '', price: '', category: 'Fresh Fish', stock_quantity: '', low_stock_threshold: '5', discount_percent: '' }); setShowModal(true); }}
                     className="btn btn-primary"
                 >
                     <Plus size={18} /> Add New Listing
@@ -184,7 +173,19 @@ const Products = () => {
                                         {p.category}
                                     </span>
                                 </td>
-                                <td style={{ textAlign: 'right', fontWeight: '600' }}>${p.price}</td>
+                                <td style={{ textAlign: 'right', fontWeight: '600' }}>
+                                    {p.discount_percent > 0 ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                            <span style={{ fontSize: '11px', textDecoration: 'line-through', color: 'var(--text-muted)' }}>${p.price}</span>
+                                            <span style={{ color: 'var(--success)' }}>
+                                                ${(p.price * (1 - p.discount_percent / 100)).toFixed(2)}
+                                                <span style={{ fontSize: '10px', background: 'var(--success)', color: 'white', padding: '1px 4px', borderRadius: '4px', marginLeft: '4px' }}>-{p.discount_percent}%</span>
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        `$${p.price}`
+                                    )}
+                                </td>
                                 <td style={{ textAlign: 'center' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                         <span style={{
@@ -272,6 +273,12 @@ const Products = () => {
                                 <label>Low Stock Warning Threshold (kg)</label>
                                 <input type="number" value={formData.low_stock_threshold} onChange={(e) => setFormData({ ...formData, low_stock_threshold: e.target.value })} placeholder="Default: 5" />
                                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Alert when stock drops below this amount.</span>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Discount (%)</label>
+                                <input type="number" min="0" max="100" value={formData.discount_percent || ''} onChange={(e) => setFormData({ ...formData, discount_percent: e.target.value })} placeholder="e.g. 10" />
+                                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Applies a percentage discount to the retail price.</span>
                             </div>
 
                             <div className="form-group">

@@ -3,12 +3,24 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply antialiased text-midnight bg-surface font-sans;
     background-color: #F6F8FA;
-    /* surface color fallback */
     color: #0B0B0B;
-    /* midnight color fallback */
+  }
+
+  /* Global smooth transitions for common interactive elements */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  .card {
+    @apply transition-all duration-300 ease-in-out;
   }
 }
 

@@ -43,7 +43,6 @@ const Home = () => {
     };
 
     const recommendedProducts = products.slice(0, 3);
-    const featuredProducts = products.slice(0, 8);
 
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },

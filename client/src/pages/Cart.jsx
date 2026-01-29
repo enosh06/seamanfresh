@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Trash2, ShoppingBag, ArrowRight, Plus, Minus, Package } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
+import API_URL from '../config';
 
 const Cart = () => {
     const { cart, removeFromCart, updateQuantity, subtotal } = useCart();
@@ -49,7 +50,7 @@ const Cart = () => {
                                     {/* Product Image */}
                                     <div className="flex-shrink-0">
                                         <img
-                                            src={item.image_url ? `http://localhost:5000${item.image_url}` : 'https://placehold.co/120x120?text=Fish'}
+                                            src={item.image_url ? `${API_URL}${item.image_url}` : 'https://placehold.co/120x120?text=Fish'}
                                             alt={item.name}
                                             className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-xl"
                                         />

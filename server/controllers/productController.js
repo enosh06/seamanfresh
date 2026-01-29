@@ -25,12 +25,12 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
     try {
-        const { name, description, price, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold } = req.body;
-        const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+        const { name, description, price, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold, discount_percent } = req.body;
+        const image_url = req.file ? req.file.path : null;
 
         const [result] = await db.execute(
-            'INSERT INTO products (name, description, price, image_url, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [name, description, price, image_url, category, stock_quantity, wholesale_price || null, wholesale_moq || 0, low_stock_threshold || 5]
+            'INSERT INTO products (name, description, price, image_url, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold, discount_percent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, description, price, image_url, category, stock_quantity, wholesale_price || null, wholesale_moq || 0, low_stock_threshold || 5, discount_percent || 0]
         );
 
         res.status(201).json({ message: 'Product created successfully', productId: result.insertId });
@@ -42,19 +42,20 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
     try {
-        const { name, description, price, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold } = req.body;
+        const { name, description, price, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold, discount_percent } = req.body;
 
         // Handle empty strings for wholesale fields
         const w_price = wholesale_price === '' ? null : wholesale_price;
         const w_moq = wholesale_moq === '' ? 0 : wholesale_moq;
         const ls_threshold = low_stock_threshold === '' ? 5 : low_stock_threshold;
+        const d_percent = discount_percent === '' ? 0 : discount_percent;
 
-        const updateParams = [name, description, price, category, stock_quantity, w_price, w_moq, ls_threshold];
-        let query = 'UPDATE products SET name = ?, description = ?, price = ?, category = ?, stock_quantity = ?, wholesale_price = ?, wholesale_moq = ?, low_stock_threshold = ?';
+        const updateParams = [name, description, price, category, stock_quantity, w_price, w_moq, ls_threshold, d_percent];
+        let query = 'UPDATE products SET name = ?, description = ?, price = ?, category = ?, stock_quantity = ?, wholesale_price = ?, wholesale_moq = ?, low_stock_threshold = ?, discount_percent = ?';
 
         if (req.file) {
             query += ', image_url = ?';
-            updateParams.push(`/uploads/${req.file.filename}`);
+            updateParams.push(req.file.path);
         }
 
         query += ' WHERE id = ?';

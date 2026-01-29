@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
+import API_URL from '../config';
 import { Plus, Edit, Trash2, X, Upload, Package } from 'lucide-react';
 
 const AdminProducts = () => {
@@ -13,7 +14,7 @@ const AdminProducts = () => {
     const [imagePreview, setImagePreview] = useState(null);
 
     const fetchProducts = useCallback(async () => {
-        const res = await axios.get('http://localhost:5000/api/products');
+        const res = await api.get('/products');
         setProducts(res.data);
     }, []);
 
@@ -33,16 +34,13 @@ const AdminProducts = () => {
             wholesale_price: product.wholesale_price || '',
             wholesale_moq: product.wholesale_moq || ''
         });
-        setImagePreview(product.image_url ? `http://localhost:5000${product.image_url}` : null);
+        setImagePreview(product.image_url ? `${API_URL}${product.image_url}` : null);
         setShowModal(true);
     };
 
     const handleDelete = async (id) => {
         if (window.confirm('Delete this product?')) {
-            const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/products/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/products/${id}`);
             fetchProducts();
         }
     };
@@ -57,20 +55,16 @@ const AdminProducts = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('token');
         const data = new FormData();
         Object.keys(formData).forEach(key => data.append(key, formData[key]));
         if (image) data.append('image', image);
 
         try {
+            // Content-Type multipart/form-data is usually handled automatically by axios when passed FormData
             if (editingProduct) {
-                await axios.put(`http://localhost:5000/api/products/${editingProduct.id}`, data, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.put(`/products/${editingProduct.id}`, data);
             } else {
-                await axios.post('http://localhost:5000/api/products', data, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.post('/products', data);
             }
             setShowModal(false);
             setEditingProduct(null);

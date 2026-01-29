@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Eye, Truck, Package, CheckCircle, Clock, XCircle } from 'lucide-react';
+import api from '../api/axios';
 import API_URL from '../config';
+import { Eye, Truck, Package, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 const Orders = () => {
     const [orders, setOrders] = useState([]);
@@ -9,10 +9,7 @@ const Orders = () => {
 
     const fetchOrders = async () => {
         try {
-            const token = localStorage.getItem('admin_token');
-            const res = await axios.get(`${API_URL}/api/orders`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get(`/orders?_t=${Date.now()}`);
             setOrders(res.data);
         } catch (err) {
             console.error(err);
@@ -35,10 +32,7 @@ const Orders = () => {
 
     const updateStatus = async (id, status) => {
         try {
-            const token = localStorage.getItem('admin_token');
-            await axios.put(`${API_URL}/api/orders/${id}/status`, { status }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.put(`/orders/${id}/status`, { status });
             fetchOrders();
         } catch {
             alert('Failed to update status');
@@ -80,10 +74,7 @@ const Orders = () => {
 
     const viewOrderDetails = async (id) => {
         try {
-            const token = localStorage.getItem('admin_token');
-            const res = await axios.get(`${API_URL}/api/orders/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get(`/orders/${id}`);
             setSelectedOrder(res.data);
             setShowModal(true);
         } catch (err) {

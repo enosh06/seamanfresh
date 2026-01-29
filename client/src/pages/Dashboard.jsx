@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { Package, Clock, CheckCircle, Truck, XCircle, LogOut, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,12 +11,8 @@ const Dashboard = () => {
 
     useEffect(() => {
         const fetchOrders = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) return;
             try {
-                const res = await axios.get('http://localhost:5000/api/orders/my-orders', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await api.get('/orders/my-orders');
                 setOrders(res.data);
             } catch (error) {
                 console.error("Failed to load orders", error);
@@ -157,9 +153,9 @@ const Dashboard = () => {
                                             <td className="px-8 py-6">
                                                 <div className="flex justify-center">
                                                     <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${order.status === 'delivered' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                            order.status === 'shipped' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                                order.status === 'processing' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
-                                                                    'bg-gray-50 text-gray-700 border-gray-200'
+                                                        order.status === 'shipped' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                            order.status === 'processing' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                                                                'bg-gray-50 text-gray-700 border-gray-200'
                                                         }`}>
                                                         {getStatusIcon(order.status)}
                                                         {order.status}

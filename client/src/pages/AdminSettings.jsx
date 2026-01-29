@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../api/axios';
 import { Lock, Key, CheckCircle, AlertCircle, User, Mail } from 'lucide-react';
 
 const AdminSettings = () => {
@@ -31,12 +31,9 @@ const AdminSettings = () => {
         setLoading(true);
 
         try {
-            const token = localStorage.getItem('token');
-            await axios.put('http://localhost:5000/api/auth/change-password', {
+            await api.put('/auth/change-password', {
                 currentPassword: formData.currentPassword,
                 newPassword: formData.newPassword
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
 
             setMessage({ type: 'success', text: 'Password changed successfully!' });
@@ -108,8 +105,8 @@ const AdminSettings = () => {
 
                             {message.text && (
                                 <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${message.type === 'success'
-                                        ? 'bg-green-50 border border-green-200 text-green-700'
-                                        : 'bg-red-50 border border-red-200 text-red-700'
+                                    ? 'bg-green-50 border border-green-200 text-green-700'
+                                    : 'bg-red-50 border border-red-200 text-red-700'
                                     }`}>
                                     {message.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
                                     <span className="font-semibold">{message.text}</span>

@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { Package, MapPin, Clock, CheckCircle, XCircle, Truck, Trash2 } from 'lucide-react';
 
 const AdminOrders = () => {
     const [orders, setOrders] = useState([]);
 
     const fetchOrders = useCallback(async () => {
-        const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:5000/api/orders', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get('/orders');
         setOrders(res.data);
     }, []);
 
@@ -19,20 +16,14 @@ const AdminOrders = () => {
     }, [fetchOrders]);
 
     const updateStatus = async (id, status) => {
-        const token = localStorage.getItem('token');
-        await axios.put(`http://localhost:5000/api/orders/${id}/status`, { status }, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.put(`/orders/${id}/status`, { status });
         fetchOrders();
     };
 
     const handleClearOrders = async () => {
         if (window.confirm('Are you sure you want to delete ALL orders? This cannot be undone.')) {
             try {
-                const token = localStorage.getItem('token');
-                await axios.delete('http://localhost:5000/api/orders', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.delete('/orders');
                 fetchOrders();
                 alert('All orders have been cleared.');
             } catch (err) {

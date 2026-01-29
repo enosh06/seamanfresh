@@ -47,7 +47,9 @@ const Checkout = () => {
 
             setIsSuccess(true);
             // Play local 'new-notification' alert sound
-            const audio = new Audio('/notification.mp3');
+            // Play local 'new-notification' alert sound
+            const soundPath = `${import.meta.env.BASE_URL}notification.mp3`;
+            const audio = new Audio(soundPath);
             audio.volume = 0.8;
             audio.play().catch(e => console.log("Audio play blocked by browser:", e));
 
@@ -114,7 +116,7 @@ const Checkout = () => {
                                 />
                                 <p className="text-xs text-gray-400 flex items-center gap-1">
                                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                    We deliver within 24 hours
+                                    Fast & Fresh Delivery
                                 </p>
                             </div>
                         </div>

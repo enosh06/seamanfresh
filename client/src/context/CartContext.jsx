@@ -57,6 +57,11 @@ export const CartProvider = ({ children }) => {
                     price = price * 0.8; // Fallback to 20% discount
                 }
             }
+        } else {
+            // Retail Discount
+            if (item.discount_percent && item.discount_percent > 0) {
+                price = price * (1 - item.discount_percent / 100);
+            }
         }
         return acc + (price * item.quantity);
     }, 0);

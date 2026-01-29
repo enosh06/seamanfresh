@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import API_URL from '../config';
+import api from '../api/axios';
 
 const AuthContext = createContext();
 
@@ -14,10 +13,6 @@ export const AuthProvider = ({ children }) => {
             if (userData && userData.role === 'admin') {
                 return userData;
             } else {
-                // Side effect in lazy init? Better to handle token cleanup if invalid.
-                // But lazy init must be pure.
-                // So we just return null if invalid, and maybe clear localStorage in effect?
-                // Or just return null.
                 return null;
             }
         }
@@ -42,7 +37,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const login = async (email, password) => {
-        const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
+        const response = await api.post('/auth/login', { email, password });
         const { token, user } = response.data;
 
         if (user.role !== 'admin') {

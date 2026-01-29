@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { Send, Mail, MapPin, Phone, MessageSquare } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,7 +24,7 @@ const Contact = () => {
         setStatus({ type: '', message: '' });
 
         try {
-            await axios.post('http://localhost:5000/api/messages', {
+            await api.post('/messages', {
                 ...formData,
                 userId: user?.id
             });

@@ -1,5 +1,6 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
@@ -50,39 +51,67 @@ const AdminRoute = ({ children }) => {
   );
 };
 
+// Page Transition Component
+const PageTransition = ({ children }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      style={{ width: '100%', height: '100%' }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* Public Routes */}
+        <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+        <Route path="/products" element={<PageTransition><Products /></PageTransition>} />
+        <Route path="/product/:id" element={<PageTransition><ProductDetail /></PageTransition>} />
+        <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
+        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+        <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
+        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+        <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+
+        {/* User Private Routes */}
+        <Route path="/checkout" element={<ProtectedRoute><PageTransition><Checkout /></PageTransition></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><PageTransition><UserSettings /></PageTransition></ProtectedRoute>} />
+
+        {/* Admin Private Routes */}
+        <Route path="/admin" element={<AdminRoute><PageTransition><AdminDashboard /></PageTransition></AdminRoute>} />
+        <Route path="/admin/products" element={<AdminRoute><PageTransition><AdminProducts /></PageTransition></AdminRoute>} />
+        <Route path="/admin/orders" element={<AdminRoute><PageTransition><AdminOrders /></PageTransition></AdminRoute>} />
+        <Route path="/admin/settings" element={<AdminRoute><PageTransition><AdminSettings /></PageTransition></AdminRoute>} />
+        <Route path="/admin/messages" element={<AdminRoute><PageTransition><AdminMessages /></PageTransition></AdminRoute>} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
+import ScrollToTop from './components/ScrollToTop';
+
 const App = () => {
   return (
     <Router>
+      <ScrollToTop />
       <AuthProvider>
         <CartProvider>
           <div className="app-wrapper bg-surface" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <Navbar />
             <main style={{ flex: 1 }}>
-              <React.Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>}>
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/contact" element={<Contact />} />
-
-                  {/* User Private Routes */}
-                  <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-                  <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><UserSettings /></ProtectedRoute>} />
-
-                  {/* Admin Private Routes */}
-                  <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-                  <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
-                  <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
-                  <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
-                  <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
-                </Routes>
+              <React.Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><LoadingSpinner /></div>}>
+                <AnimatedRoutes />
               </React.Suspense>
             </main>
             <Footer />

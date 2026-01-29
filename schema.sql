@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS products (
     stock_quantity INT DEFAULT 0,
     wholesale_price DECIMAL(10, 2),
     wholesale_moq INT DEFAULT 0,
+    low_stock_threshold INT DEFAULT 5,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -57,6 +58,19 @@ CREATE TABLE IF NOT EXISTS banners (
     subtitle VARCHAR(255),
     link VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Contact Messages table
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Initial Admin User (password: admin123)

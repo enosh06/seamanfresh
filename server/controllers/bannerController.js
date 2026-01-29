@@ -13,7 +13,7 @@ exports.getAllBanners = async (req, res) => {
 exports.createBanner = async (req, res) => {
     try {
         const { title, subtitle, link } = req.body;
-        const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+        const image_url = req.file ? req.file.path : null;
 
         await db.execute(
             'INSERT INTO banners (title, subtitle, link, image_url) VALUES (?, ?, ?, ?)',

@@ -70,13 +70,30 @@ const Navbar = () => {
                     </Link>
                 </div>
 
-                <button onClick={handleLogout} className="btn" style={{
-                    color: 'var(--danger)',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    padding: '10px 16px',
-                }}>
-                    <LogOut size={18} /> Logout
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: 'var(--success)',
+                        background: 'rgba(16, 185, 129, 0.1)',
+                        padding: '6px 12px',
+                        borderRadius: '20px'
+                    }}>
+                        <div className="live-indicator"></div>
+                        Live Monitoring
+                    </div>
+
+                    <button onClick={handleLogout} className="btn" style={{
+                        color: 'var(--danger)',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        padding: '10px 16px',
+                    }}>
+                        <LogOut size={18} /> Logout
+                    </button>
+                </div>
             </div>
         </nav>
     );

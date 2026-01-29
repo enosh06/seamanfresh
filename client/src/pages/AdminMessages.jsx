@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { Mail, Trash2, Calendar, User, Search } from 'lucide-react';
 
 const formatDate = (dateString) => {
@@ -23,10 +23,7 @@ const AdminMessages = () => {
     useEffect(() => {
         const fetchMessages = async () => {
             try {
-                const token = localStorage.getItem('token');
-                const res = await axios.get('http://localhost:5000/api/messages', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await api.get('/messages');
                 setMessages(res.data);
                 setLoading(false);
             } catch (error) {
@@ -42,10 +39,7 @@ const AdminMessages = () => {
         if (!window.confirm('Are you sure you want to delete this message?')) return;
 
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/messages/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/messages/${id}`);
             setMessages(messages.filter(msg => msg.id !== id));
         } catch (error) {
             console.error('Error deleting message:', error);

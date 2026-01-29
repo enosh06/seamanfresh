@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
+import API_URL from '../config';
 import { ShoppingCart, ArrowLeft, Plus, Minus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useUserType } from '../context/UserTypeContext';
@@ -18,7 +19,7 @@ const ProductDetail = () => {
 
     useEffect(() => {
         const fetchProduct = async () => {
-            const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+            const res = await api.get(`/products/${id}`);
             setProduct(res.data);
 
             // Auto-set quantity to MOQ for wholesale users
@@ -56,7 +57,7 @@ const ProductDetail = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '60px', alignItems: 'start' }}>
                     <div className="card">
-                        <img src={product.image_url ? `http://localhost:5000${product.image_url}` : 'https://placehold.co/600x450?text=Fish'}
+                        <img src={product.image_url ? `${API_URL}${product.image_url}` : 'https://placehold.co/600x450?text=Fish'}
                             alt={product.name} style={{ width: '100%', borderRadius: '8px' }} />
                     </div>
 

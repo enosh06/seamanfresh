@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Package, ShoppingBag, DollarSign, ArrowRight, RefreshCw, Bell, Users, AlertTriangle, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import API_URL, { STORE_URL } from '../config';
+import { STORE_URL } from '../config';
+import api from '../api/axios';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({ orders: 0, products: 0, revenue: 0, users: 0 });
@@ -12,11 +12,10 @@ const Dashboard = () => {
 
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem('admin_token');
             const [oRes, pRes, uRes] = await Promise.all([
-                axios.get(`${API_URL}/api/orders`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_URL}/api/products`),
-                axios.get(`${API_URL}/api/auth/users`, { headers: { Authorization: `Bearer ${token}` } })
+                api.get(`/orders?_t=${Date.now()}`),
+                api.get(`/products?_t=${Date.now()}`),
+                api.get(`/auth/users?_t=${Date.now()}`)
             ]);
 
             const ordersData = Array.isArray(oRes.data) ? oRes.data : [];
