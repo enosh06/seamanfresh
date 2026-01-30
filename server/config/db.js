@@ -9,18 +9,19 @@ if (result.error) {
     console.error('Error loading .env file:', result.error);
 }
 
-// console.log('Database Config:', {
-//     host: process.env.DB_HOST,
-//     user: process.env.DB_USER,
-//     database: process.env.DB_NAME,
-//     port: process.env.DB_PORT
-// });
+console.log('Database Config:', {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
+    envPath: path.join(__dirname, '../.env')
+});
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
+    database: process.env.DB_NAME || 'seaman_fresh', // Fallback to default DB name
     port: process.env.DB_PORT || 3306,
     waitForConnections: true,
     connectionLimit: 10,
