@@ -31,9 +31,13 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body || {};
         console.log('--- Login Attempt ---');
         console.log('Email:', email);
+
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
 
         // Find user
         const [users] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
@@ -74,6 +78,12 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
+        const fs = require('fs');
+        const path = require('path');
+        const logPath = path.join(__dirname, '../server_error.log');
+        const logMessage = `[${new Date().toISOString()}] LOGIN ERROR: ${error.stack}\n`;
+        fs.appendFile(logPath, logMessage, (err) => { if (err) console.error('Failed to write to log:', err); });
+
         console.error('CRITICAL LOGIN ERROR:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }

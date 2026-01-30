@@ -75,5 +75,5 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 
 -- Initial Admin User (password: admin123)
 -- Hash: $2a$10$Xm1k6K0X0I9k2oXyG4y9eO (placeholder, will be properly hashed in code)
-INSERT INTO users (name, email, password, role) VALUES 
+INSERT IGNORE INTO users (name, email, password, role) VALUES 
 ('Admin', 'admin@seamanfresh.com', '$2a$10$7rLSvRl1Z7Z7Z7Z7Z7Z7Zu', 'admin');
