@@ -1,7 +1,20 @@
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
+const path = require('path');
 
-dotenv.config();
+// Explicitly load .env from the server directory
+const result = dotenv.config({ path: path.join(__dirname, '../.env') });
+
+if (result.error) {
+    console.error('Error loading .env file:', result.error);
+}
+
+// console.log('Database Config:', {
+//     host: process.env.DB_HOST,
+//     user: process.env.DB_USER,
+//     database: process.env.DB_NAME,
+//     port: process.env.DB_PORT
+// });
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
