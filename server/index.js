@@ -47,6 +47,10 @@ app.use('/api/banners', bannerRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/setup', require('./routes/setup'));
 
+app.get('/api/ping', (req, res) => {
+    res.json({ message: 'pong', time: new Date().toISOString() });
+});
+
 app.get('/', (req, res) => {
     res.send('Seaman Fresh API is running...');
 });

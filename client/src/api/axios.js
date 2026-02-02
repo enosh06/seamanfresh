@@ -1,31 +1,42 @@
 import axios from 'axios';
-import API_URL from '../config';
+// Normalize API_URL to not have a trailing slash
+const normalizedApiUrl = API_URL.replace(/\/+$/, '');
 
 const api = axios.create({
-    baseURL: API_URL.endsWith('/api') ? API_URL : `${API_URL}/api`,
+    baseURL: normalizedApiUrl.endsWith('/api') ? normalizedApiUrl : `${normalizedApiUrl}/api`,
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// Add a request interceptor to include the auth token in all requests
+// Request interceptor to include the auth token and normalize URLs
 api.interceptors.request.use(
     (config) => {
-        // Ensure URLs starting with / don't bypass the /api subpath in baseURL
+        // Ensure URLs don't start with a slash to avoid bypassing baseURL subpath
         if (config.url && config.url.startsWith('/')) {
             config.url = config.url.substring(1);
         }
+
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
+    (error) => Promise.reject(error)
+);
+
+// Response interceptor to handle authentication errors
+api.interceptors.response.use(
+    (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/#/login';
+            // Only redirect if not already on login/signup to avoid loops
+            if (!window.location.hash.includes('login') && !window.location.hash.includes('signup')) {
+                window.location.href = '/#/login';
+            }
         }
         return Promise.reject(error);
     }

@@ -16,15 +16,22 @@ const Signup = () => {
         setError('');
         try {
             await signup(formData);
-            // Optionally could auto-login here, but redirecting to login is safer for now
             navigate('/login');
         } catch (err) {
-            console.error('Signup error:', err);
+            console.error('Signup error details:', {
+                message: err.message,
+                code: err.code,
+                response: err.response?.data,
+                config: err.config ? { url: err.config.url, baseURL: err.config.baseURL } : null
+            });
+
             // Show specific message from backend if available
             if (err.response && err.response.data && err.response.data.message) {
                 setError(err.response.data.message);
+            } else if (err.code === 'ERR_NETWORK') {
+                setError(`Connection failed: Check if the server is running at ${err.config?.baseURL || 'its port'}`);
             } else {
-                setError('Signup failed. Please try again or check your connection.');
+                setError(err.reason || err.message || 'Signup failed. Please try again.');
             }
         }
     };
