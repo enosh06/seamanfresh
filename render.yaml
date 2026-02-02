@@ -14,13 +14,7 @@ services:
         value: 5000
       - key: JWT_SECRET
         generateValue: true
-      - key: DB_HOST
+      - key: DATABASE_URL
         sync: false
-      - key: DB_USER
-        sync: false
-      - key: DB_PASS
-        sync: false
-      - key: DB_NAME
-        sync: false
-      - key: DB_PORT
-        value: 3306
+      - key: DB_SSL
+        value: "true"

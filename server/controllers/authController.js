@@ -18,11 +18,11 @@ exports.signup = async (req, res) => {
 
         // Insert user
         const [result] = await db.execute(
-            'INSERT INTO users (name, email, password, phone, address) VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO users (name, email, password, phone, address) VALUES (?, ?, ?, ?, ?) RETURNING id',
             [name, email, hashedPassword, phone, address]
         );
 
-        res.status(201).json({ message: 'User created successfully', userId: result.insertId });
+        res.status(201).json({ message: 'User created successfully', userId: result[0].id });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });

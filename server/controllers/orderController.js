@@ -10,11 +10,11 @@ exports.createOrder = async (req, res) => {
         const user_id = req.user.id;
 
         // 1. Create Order
-        const [orderResult] = await connection.execute(
-            'INSERT INTO orders (user_id, total_amount, delivery_address) VALUES (?, ?, ?)',
+        const [orderRows] = await connection.execute(
+            'INSERT INTO orders (user_id, total_amount, delivery_address) VALUES (?, ?, ?) RETURNING id',
             [user_id, total_amount, delivery_address]
         );
-        const orderId = orderResult.insertId;
+        const orderId = orderRows.id; // From the RETURNING clause mapping in wrapper
 
         // 2. Create Order Items
         for (const item of items) {
@@ -127,7 +127,7 @@ exports.getAnalytics = async (req, res) => {
                 DATE(created_at) as date, 
                 SUM(total_amount) as revenue 
             FROM orders 
-            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+            WHERE created_at >= CURRENT_DATE - INTERVAL '6 days'
             GROUP BY DATE(created_at)
             ORDER BY date ASC
         `);

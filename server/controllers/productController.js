@@ -29,11 +29,11 @@ exports.createProduct = async (req, res) => {
         const image_url = req.file ? req.file.path : null;
 
         const [result] = await db.execute(
-            'INSERT INTO products (name, description, price, image_url, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold, discount_percent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO products (name, description, price, image_url, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold, discount_percent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
             [name, description, price, image_url, category, stock_quantity, wholesale_price || null, wholesale_moq || 0, low_stock_threshold || 5, discount_percent || 0]
         );
 
-        res.status(201).json({ message: 'Product created successfully', productId: result.insertId });
+        res.status(201).json({ message: 'Product created successfully', productId: result[0].id });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
