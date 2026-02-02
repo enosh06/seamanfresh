@@ -1,0 +1,7 @@
+name = "seaman-fresh-admin"
+compatibility_date = "2024-04-01"
+pages_build_output_dir = "dist"
+
+[vars]
+VITE_API_URL = "https://seaman-fresh-final.onrender.com"
+VITE_STORE_URL = "https://seaman-fresh-client.pages.dev"
