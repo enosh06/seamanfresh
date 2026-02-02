@@ -1,10 +1,20 @@
 import axios from 'axios';
 import API_URL from '../config';
-// Normalize API_URL to not have a trailing slash
-const normalizedApiUrl = API_URL.replace(/\/+$/, '');
+
+// Robust normalization of API_URL
+const getBaseURL = () => {
+    try {
+        const url = API_URL || (import.meta.env.PROD ? 'https://seaman-fresh-final.onrender.com' : 'http://localhost:5000');
+        const normalized = url.toString().replace(/\/+$/, '');
+        return normalized.endsWith('/api') ? normalized : `${normalized}/api`;
+    } catch (e) {
+        console.error('Error in axios baseURL normalization:', e);
+        return 'http://localhost:5000/api';
+    }
+};
 
 const api = axios.create({
-    baseURL: normalizedApiUrl.endsWith('/api') ? normalizedApiUrl : `${normalizedApiUrl}/api`,
+    baseURL: getBaseURL(),
     headers: {
         'Content-Type': 'application/json'
     }
