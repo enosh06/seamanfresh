@@ -11,6 +11,10 @@ const api = axios.create({
 // Add a request interceptor to include the auth token in all requests
 api.interceptors.request.use(
     (config) => {
+        // Ensure URLs starting with / don't bypass the /api subpath in baseURL
+        if (config.url && config.url.startsWith('/')) {
+            config.url = config.url.substring(1);
+        }
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;

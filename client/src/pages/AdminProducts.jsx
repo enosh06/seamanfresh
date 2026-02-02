@@ -64,7 +64,7 @@ const AdminProducts = () => {
             if (editingProduct) {
                 await api.put(`/products/${editingProduct.id}`, data);
             } else {
-                await api.post('/products', data);
+                await api.post('products', data);
             }
             setShowModal(false);
             setEditingProduct(null);

@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         // Errors are now thrown by axios and caught in the component
-        const response = await api.post('/auth/login', { email, password });
+        const response = await api.post('auth/login', { email, password });
         const { token, user } = response.data;
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
 
     const signup = async (userData) => {
         // Return response so component can react
-        const response = await api.post('/auth/signup', userData);
+        const response = await api.post('auth/signup', userData);
         return response.data;
     };
 

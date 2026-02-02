@@ -11,6 +11,10 @@ const api = axios.create({
 // Request interceptor for API calls
 api.interceptors.request.use(
     (config) => {
+        // Ensure URLs starting with / don't bypass the /api subpath in baseURL
+        if (config.url && config.url.startsWith('/')) {
+            config.url = config.url.substring(1);
+        }
         const token = localStorage.getItem('admin_token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
