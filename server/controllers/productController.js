@@ -25,7 +25,7 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
     try {
-        const { name, description, price, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold, discount_percent } = req.body;
+        const { name, description, price, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold, discount_percent } = req.body || {};
         const image_url = req.file ? req.file.path : null;
 
         const [result] = await db.execute(
@@ -42,7 +42,7 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
     try {
-        const { name, description, price, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold, discount_percent } = req.body;
+        const { name, description, price, category, stock_quantity, wholesale_price, wholesale_moq, low_stock_threshold, discount_percent } = req.body || {};
 
         // Handle empty strings for wholesale fields
         const w_price = wholesale_price === '' ? null : wholesale_price;

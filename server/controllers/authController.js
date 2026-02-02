@@ -4,7 +4,11 @@ const jwt = require('jsonwebtoken');
 
 exports.signup = async (req, res) => {
     try {
-        const { name, email, password, phone, address } = req.body;
+        const { name, email, password, phone, address } = req.body || {};
+
+        if (!email || !password || !name) {
+            return res.status(400).json({ message: 'Name, email and password are required' });
+        }
 
         // Check if user exists
         const [existingUser] = await db.execute('SELECT id FROM users WHERE email = ?', [email]);
@@ -91,7 +95,7 @@ exports.login = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
     try {
-        const { currentPassword, newPassword } = req.body;
+        const { currentPassword, newPassword } = req.body || {};
         const userId = req.user.id; // From verifyToken middleware
 
         // Get current user

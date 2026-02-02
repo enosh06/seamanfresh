@@ -6,8 +6,12 @@ exports.createOrder = async (req, res) => {
         connection = await db.getConnection();
         await connection.beginTransaction();
 
-        const { items, total_amount, delivery_address } = req.body;
+        const { items, total_amount, delivery_address } = req.body || {};
         const user_id = req.user.id;
+
+        if (!items || !Array.isArray(items)) {
+            return res.status(400).json({ message: 'Items are required' });
+        }
 
         // 1. Create Order
         const [orderRows] = await connection.execute(
@@ -132,11 +136,11 @@ exports.getAnalytics = async (req, res) => {
             ORDER BY date ASC
         `);
 
-        // Create a map of existing data
         const dataMap = new Map();
         rows.forEach(row => {
-            // Format date as YYYY-MM-DD to ensure matching
-            const dateStr = row.date.toISOString().split('T')[0];
+            // Handle both Date objects and strings from different DB drivers
+            const dateObj = row.date instanceof Date ? row.date : new Date(row.date);
+            const dateStr = dateObj.toISOString().split('T')[0];
             dataMap.set(dateStr, parseFloat(row.revenue));
         });
 
