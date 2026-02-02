@@ -1,4 +1,5 @@
 import axios from 'axios';
+import API_URL from '../config';
 // Normalize API_URL to not have a trailing slash
 const normalizedApiUrl = API_URL.replace(/\/+$/, '');
 
