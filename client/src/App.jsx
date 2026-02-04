@@ -9,6 +9,7 @@ import FixedPanelLink from './components/FixedPanelLink';
 import SeamanAssistant from './components/SeamanAssistant';
 
 import LoadingSpinner from './components/LoadingSpinner';
+import ServerStatusBanner from './components/ServerStatusBanner';
 
 // Pages - Lazy Loading
 const Home = React.lazy(() => import('./pages/Home'));
@@ -117,6 +118,7 @@ const App = () => {
             <Footer />
             <FixedPanelLink />
             <SeamanAssistant />
+            <ServerStatusBanner />
           </div>
         </CartProvider>
       </AuthProvider>

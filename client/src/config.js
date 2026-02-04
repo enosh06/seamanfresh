@@ -15,7 +15,7 @@ const API_URL = isLocalAddress
 
 export const ADMIN_URL = isLocalAddress
     ? `http://${hostname}:5174`
-    : 'https://admin-seaman-fresh.onrender.com';
+    : 'https://seaman-fresh-admin.pages.dev';
 
 console.log('--- NETWORK DEBUG ---');
 console.log('Current Hostname:', hostname);

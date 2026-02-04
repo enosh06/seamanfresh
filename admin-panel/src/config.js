@@ -13,7 +13,7 @@ export const API_URL = isLocalAddress
 
 export const STORE_URL = isLocalAddress
     ? `http://${hostname}:5173`
-    : 'https://seaman-fresh-final.netlify.app';
+    : 'https://seaman-fresh-client.pages.dev';
 
 console.log('--- ADMIN NETWORK DEBUG ---');
 console.log('Hostname:', hostname);

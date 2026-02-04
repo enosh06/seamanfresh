@@ -10,6 +10,7 @@ const Orders = React.lazy(() => import('./pages/Orders'));
 import Navbar from './components/Navbar';
 import NotificationSound from './components/NotificationSound';
 import FixedPanelLink from './components/FixedPanelLink';
+import ServerStatusBanner from './components/ServerStatusBanner';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -67,6 +68,7 @@ function App() {
         <React.Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#666' }}>Loading...</div>}>
           <AnimatedRoutes />
           <FixedPanelLink />
+          <ServerStatusBanner />
         </React.Suspense>
       </Router>
     </AuthProvider>
