@@ -11,7 +11,7 @@ const isLocalAddress =
 // Otherwise, we talk to the production Render server
 const API_URL = isLocalAddress
     ? `http://${hostname}:5000`
-    : 'https://seaman-fresh-final.onrender.com';
+    : 'https://seaman-fresh-api.onrender.com';
 
 export const ADMIN_URL = isLocalAddress
     ? `http://${hostname}:5174`

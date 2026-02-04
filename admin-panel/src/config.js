@@ -9,7 +9,7 @@ const isLocalAddress =
 
 export const API_URL = isLocalAddress
     ? `http://${hostname}:5000`
-    : 'https://seaman-fresh-final.onrender.com';
+    : 'https://seaman-fresh-api.onrender.com';
 
 export const STORE_URL = isLocalAddress
     ? `http://${hostname}:5173`
