@@ -1,20 +1,45 @@
-version: 1
 services:
+  # Backend: Django
   - type: web
     name: seaman-fresh-api
-    env: node
-    region: oregon
-    plan: free
-    buildCommand: cd server && npm install
-    startCommand: cd server && node index.js
+    env: python
+    buildCommand: "cd backend_django && pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate"
+    startCommand: "cd backend_django && gunicorn core.wsgi"
     envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 5000
-      - key: JWT_SECRET
-        generateValue: true
+      - key: DEBUG
+        value: "False"
       - key: DATABASE_URL
-        sync: false
-      - key: DB_SSL
-        value: "true"
+        fromDatabase:
+          name: seaman-fresh-db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "*" # Update with actual domains in production
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://seaman-fresh-client.pages.dev,https://seaman-fresh-admin.pages.dev"
+
+  # Database: PostgreSQL (Optional, use existing Neon/TiDB if preferred)
+  # - type: db
+  #   name: seaman-fresh-db
+  #   ipAllowList: [] # Only allow internal connections
+
+  # Frontend: Client
+  - type: web
+    name: seaman-fresh-client
+    env: static
+    buildCommand: "cd client && npm install && npm run build"
+    staticPublishPath: "client/dist"
+    envVars:
+      - key: VITE_API_URL
+        value: "https://seaman-fresh-api.onrender.com"
+
+  # Frontend: Admin Panel
+  - type: web
+    name: seaman-fresh-admin
+    env: static
+    buildCommand: "cd admin-panel && npm install && npm run build"
+    staticPublishPath: "admin-panel/dist"
+    envVars:
+      - key: VITE_API_URL
+        value: "https://seaman-fresh-api.onrender.com"

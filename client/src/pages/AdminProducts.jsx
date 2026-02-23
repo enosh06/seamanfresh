@@ -34,7 +34,7 @@ const AdminProducts = () => {
             wholesale_price: product.wholesale_price || '',
             wholesale_moq: product.wholesale_moq || ''
         });
-        setImagePreview(product.image_url ? `${API_URL}${product.image_url}` : null);
+        setImagePreview(product.image ? (product.image.startsWith('http') ? product.image : `${API_URL}${product.image}`) : null);
         setShowModal(true);
     };
 
@@ -113,7 +113,7 @@ const AdminProducts = () => {
                         <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                             <div className="h-48 bg-gray-100 relative">
                                 <img
-                                    src={product.image_url ? `${API_URL}${product.image_url}` : 'https://placehold.co/400x300?text=No+Image'}
+                                    src={product.image ? (product.image.startsWith('http') ? product.image : `${API_URL}${product.image}`) : 'https://placehold.co/400x300?text=No+Image'}
                                     alt={product.name}
                                     className="w-full h-full object-cover"
                                 />

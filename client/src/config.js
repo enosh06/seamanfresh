@@ -1,4 +1,3 @@
-// Use current hostname to determine API URL dynamically
 const hostname = window.location.hostname;
 const isLocalAddress =
     hostname === 'localhost' ||
@@ -7,19 +6,18 @@ const isLocalAddress =
     hostname.startsWith('10.') ||
     hostname.startsWith('172.');
 
-// If we are on a local network, we want to talk to the local server on the SAME machine (IP)
-// Otherwise, we talk to the production Render server
-const API_URL = isLocalAddress
-    ? `http://${hostname}:5000`
-    : 'https://seaman-fresh-api.onrender.com';
+// FORCE 8000 FOR LOCAL
+const API_URL = import.meta.env.VITE_API_URL || (isLocalAddress
+    ? "http://127.0.0.1:8000"
+    : "https://seaman-fresh-api.onrender.com");
 
-export const ADMIN_URL = isLocalAddress
+export const ADMIN_URL = import.meta.env.VITE_ADMIN_URL || (isLocalAddress
     ? `http://${hostname}:5174`
-    : 'https://seaman-fresh-admin.pages.dev';
+    : 'https://seaman-fresh-admin.pages.dev');
 
-console.log('--- NETWORK DEBUG ---');
-console.log('Current Hostname:', hostname);
-console.log('Is Local Network:', isLocalAddress);
+console.log('--- CUSTOMER NETWORK DEBUG ---');
+console.log('Hostname:', hostname);
 console.log('Final API_URL:', API_URL);
 
+export { API_URL };
 export default API_URL;

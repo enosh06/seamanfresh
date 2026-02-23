@@ -12,29 +12,17 @@ const Dashboard = () => {
 
     const fetchData = async () => {
         try {
-            const [oRes, pRes, uRes] = await Promise.all([
-                api.get(`/orders?_t=${Date.now()}`),
-                api.get(`/products?_t=${Date.now()}`),
-                api.get(`/auth/users?_t=${Date.now()}`)
-            ]);
-
-            const ordersData = Array.isArray(oRes.data) ? oRes.data : [];
-            const productsData = Array.isArray(pRes.data) ? pRes.data : [];
-            const usersData = Array.isArray(uRes.data) ? uRes.data : [];
-
-            const totalRevenue = ordersData.reduce((acc, o) => acc + parseFloat(o.total_amount || 0), 0);
-
-            // Filter low stock
-            const lowStock = productsData.filter(p => p.stock_quantity < (p.low_stock_threshold || 5));
+            const res = await api.get(`/orders/stats?_t=${Date.now()}`);
+            const data = res.data;
 
             setStats({
-                orders: ordersData.length,
-                products: productsData.length,
-                revenue: totalRevenue.toFixed(2),
-                users: usersData.length
+                orders: data.total_orders,
+                products: data.total_products,
+                revenue: data.total_revenue.toFixed(2),
+                users: data.total_users
             });
-            setRecentOrders(ordersData.slice(0, 5));
-            setLowStockProducts(lowStock);
+            setRecentOrders(data.recent_orders || []);
+            setLowStockProducts(data.low_stock_products || []);
         } catch (err) {
             console.error(err);
         } finally {

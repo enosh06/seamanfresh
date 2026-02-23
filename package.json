@@ -1,9 +1,5 @@
 {
     "name": "seaman-fresh-root",
     "private": true,
-    "scripts": {
-        "deploy:client": "cd client && npm run deploy",
-        "deploy:admin": "cd admin-panel && npm run deploy",
-        "deploy:all": "npm run deploy:client && npm run deploy:admin"
-    }
+    "scripts": {}
 }

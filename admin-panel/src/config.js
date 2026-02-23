@@ -7,17 +7,18 @@ const isLocalAddress =
     hostname.startsWith('10.') ||
     hostname.startsWith('172.');
 
-export const API_URL = isLocalAddress
-    ? `http://${hostname}:5000`
-    : 'https://seaman-fresh-api.onrender.com';
+// FORCE LOCAL API URL TO 8000
+const API_URL = import.meta.env.VITE_API_URL || (isLocalAddress
+    ? "http://127.0.0.1:8000"
+    : "https://seaman-fresh-api.onrender.com");
 
-export const STORE_URL = isLocalAddress
+export const STORE_URL = import.meta.env.VITE_STORE_URL || (isLocalAddress
     ? `http://${hostname}:5173`
-    : 'https://seaman-fresh-client.pages.dev';
+    : 'https://seaman-fresh-client.pages.dev');
 
 console.log('--- ADMIN NETWORK DEBUG ---');
 console.log('Hostname:', hostname);
-console.log('Is Local Network:', isLocalAddress);
 console.log('Final API_URL:', API_URL);
 
+export { API_URL };
 export default API_URL;

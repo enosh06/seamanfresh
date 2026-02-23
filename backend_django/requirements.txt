@@ -1,0 +1,16 @@
+Django
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers
+psycopg[binary]
+python-dotenv
+dj-database-url
+PyJWT
+whitenoise
+pillow
+gunicorn
+# Serverless Dependencies
+zappa
+django-storages
+boto3
+s3transfer

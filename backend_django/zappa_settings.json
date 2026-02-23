@@ -1,0 +1,25 @@
+{
+    "dev": {
+        "django_settings": "core.settings",
+        "profile_name": "default",
+        "project_name": "seaman-fresh",
+        "runtime": "python3.11",
+        "s3_bucket": "zappa-seaman-fresh-deployments",
+        "aws_region": "us-east-1",
+        "environment_variables": {
+            "USE_S3": "TRUE",
+            "DEBUG": "False",
+            "DATABASE_URL": "postgresql://neondb_owner:npg_CWKchSwm90Yy@ep-red-smoke-ah247bnx-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require",
+            "DJANGO_SECRET_KEY": "django-insecure-zappa-deployment-key-change-me",
+            "AWS_STORAGE_BUCKET_NAME": "zappa-seaman-fresh-deployments",
+            "ALLOWED_HOSTS": "*"
+        }
+    },
+    "prod": {
+        "extends": "dev",
+        "environment_variables": {
+            "DEBUG": "False",
+            "USE_S3": "TRUE"
+        }
+    }
+}

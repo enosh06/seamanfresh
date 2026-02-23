@@ -37,7 +37,12 @@ export const AuthProvider = ({ children }) => {
     };
 
     const login = async (email, password) => {
-        const response = await api.post('auth/login', { email, password });
+        // Django expects 'username' but we use email
+        const response = await api.post('auth/login/', {
+            username: email,
+            email: email,
+            password
+        });
         const { token, user } = response.data;
 
         if (user.role !== 'admin') {

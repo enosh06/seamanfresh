@@ -1,31 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import API_URL from '../config';
+import React, { useState, useEffect, useMemo } from 'react';
+import api from '../api/axios';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { useCurrency } from '../context/CurrencyContext';
 import { useCart } from '../context/CartContext';
 import { useUserType } from '../context/UserTypeContext';
-import { ArrowRight, Star, Globe, ShieldCheck, Truck, Sparkles, ShoppingCart, Users, Building2, Quote, X, CheckCircle, Award } from 'lucide-react';
+import { usePrice } from '../hooks/usePrice';
+import API_URL from '../config';
+import { ArrowRight, Star, Globe, ShieldCheck, Truck, Sparkles, ShoppingCart, Users, Building2, X, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Home = () => {
     const [products, setProducts] = useState([]);
     const [showUserTypeModal, setShowUserTypeModal] = useState(false);
     const { t } = useLanguage();
-    const { formatPrice } = useCurrency();
     const { addToCart } = useCart();
     const { userType, setUserType, isWholesale } = useUserType();
-
-    const handleAddToCart = (product) => {
-        addToCart(product, 1);
-    };
+    const { getFinalPrice } = usePrice();
 
     useEffect(() => {
+        document.title = "SeamanFresh | Premium Global Seafood Delivery";
         const fetchProducts = async () => {
             try {
-                const res = await axios.get(`${API_URL}/api/products`);
-                setProducts(res.data);
+                const res = await api.get('/products');
+                setProducts(res.data.results || res.data);
             } catch (err) {
                 console.error("Error fetching products:", err);
             }
@@ -33,7 +30,8 @@ const Home = () => {
         fetchProducts();
 
         if (!userType) {
-            setTimeout(() => setShowUserTypeModal(true), 1500);
+            const timer = setTimeout(() => setShowUserTypeModal(true), 1500);
+            return () => clearTimeout(timer);
         }
     }, [userType]);
 
@@ -42,7 +40,7 @@ const Home = () => {
         setShowUserTypeModal(false);
     };
 
-    const recommendedProducts = products.slice(0, 3);
+    const recommendedProducts = useMemo(() => products.slice(0, 3), [products]);
 
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
@@ -51,17 +49,15 @@ const Home = () => {
 
     const staggerContainer = {
         hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.2
-            }
-        }
+        visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
+    };
+
+    const handleAddToCart = (product) => {
+        addToCart(product, 1);
     };
 
     return (
         <div className="font-sans text-slate-900 bg-gray-50 min-h-screen overflow-x-hidden">
-
             {/* User Type Selection Modal */}
             <AnimatePresence>
                 {showUserTypeModal && (
@@ -69,55 +65,61 @@ const Home = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[100] p-4"
                     >
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-white rounded-3xl max-w-2xl w-full p-8 relative shadow-2xl"
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-white rounded-[40px] max-w-2xl w-full p-10 relative shadow-2xl overflow-hidden"
                         >
+                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-sky-400 to-blue-600"></div>
+
                             <button
                                 onClick={() => setShowUserTypeModal(false)}
-                                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                                className="absolute top-6 right-6 p-2 text-gray-400 hover:text-slate-900 hover:bg-gray-100 rounded-full transition-all"
                             >
                                 <X size={24} />
                             </button>
 
-                            <h2 className="text-3xl font-bold font-display text-slate-900 mb-4 text-center">
-                                Welcome to <span className="text-sky-500">SeamanFresh</span>
-                            </h2>
-                            <p className="text-gray-600 text-center mb-8">Choose your shopping preference to get the best prices</p>
+                            <div className="text-center mb-10">
+                                <h2 className="text-4xl font-bold font-display text-slate-900 mb-4">
+                                    Tailored <span className="text-sky-500">Experience</span>
+                                </h2>
+                                <p className="text-gray-500 text-lg">Select your account type to access specialized pricing</p>
+                            </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    whileHover={{ y: -5 }}
                                     onClick={() => handleUserTypeSelect('retail')}
-                                    className="group p-8 border-2 border-gray-100 rounded-2xl hover:border-sky-500 hover:bg-sky-500/5 transition-all text-left"
+                                    className="group p-8 border border-gray-100 rounded-[32px] hover:border-sky-500 hover:bg-sky-50 transition-all text-left shadow-sm hover:shadow-xl hover:shadow-sky-500/5"
                                 >
-                                    <Users className="text-sky-500 mb-4" size={48} />
+                                    <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mb-6 text-sky-600 group-hover:bg-sky-500 group-hover:text-white transition-colors">
+                                        <Users size={32} />
+                                    </div>
                                     <h3 className="text-2xl font-bold text-slate-900 mb-2">Retail</h3>
-                                    <p className="text-gray-600 mb-4">Perfect for individuals and small families</p>
-                                    <div className="bg-gray-50 px-4 py-2 rounded-lg inline-block">
-                                        <span className="text-sm text-gray-500 font-medium">Standard Pricing</span>
+                                    <p className="text-gray-500 mb-6 leading-relaxed">Premium fresh catches for your home kitchen</p>
+                                    <div className="inline-flex items-center gap-2 text-sky-600 font-bold group-hover:gap-4 transition-all uppercase text-xs tracking-wider">
+                                        Continue <ArrowRight size={16} />
                                     </div>
                                 </motion.button>
 
                                 <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    whileHover={{ y: -5 }}
                                     onClick={() => handleUserTypeSelect('wholesale')}
-                                    className="group p-8 border-2 border-sky-500 bg-sky-500/5 rounded-2xl hover:bg-sky-500/10 transition-all text-left relative overflow-hidden"
+                                    className="group p-8 border border-sky-100 bg-sky-50/50 rounded-[32px] hover:border-sky-500 hover:bg-sky-500 transition-all text-left relative overflow-hidden shadow-sm hover:shadow-xl"
                                 >
-                                    <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg shadow-green-500/30">
-                                        20% OFF
+                                    <div className="absolute top-6 right-6 bg-green-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-lg">
+                                        Best Value
                                     </div>
-                                    <Building2 className="text-sky-500 mb-4" size={48} />
-                                    <h3 className="text-2xl font-bold text-slate-900 mb-2">Wholesale</h3>
-                                    <p className="text-gray-600 mb-4">For restaurants, hotels & bulk buyers</p>
-                                    <div className="bg-white px-4 py-2 rounded-lg border border-sky-500 inline-block">
-                                        <span className="text-sm font-bold text-sky-500">20% Discount</span>
+                                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 text-sky-500 group-hover:bg-white/20 group-hover:text-white transition-colors shadow-sm">
+                                        <Building2 size={32} />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-slate-900 group-hover:text-white mb-2">Wholesale</h3>
+                                    <p className="text-gray-500 group-hover:text-sky-100 mb-6 leading-relaxed">Bulk supplies for restaurants and retail partners</p>
+                                    <div className="inline-flex items-center gap-2 text-sky-600 group-hover:text-white font-bold group-hover:gap-4 transition-all uppercase text-xs tracking-wider">
+                                        Explore Rates <ArrowRight size={16} />
                                     </div>
                                 </motion.button>
                             </div>
@@ -127,34 +129,46 @@ const Home = () => {
             </AnimatePresence>
 
             {/* Hero Section */}
-            <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-slate-900 via-[#003f63] to-sky-500">
-                <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] animate-pulse"></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+            <section className="relative min-h-screen flex items-center overflow-hidden bg-slate-900">
+                <div className="absolute inset-0 z-0">
+                    <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-sky-500/20 rounded-full blur-[120px]"></div>
+                    <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[100px]"></div>
+                    <img
+                        src="https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&q=80"
+                        alt="Seafood Background"
+                        className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay"
+                    />
+                </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
                     <motion.div
                         initial="hidden"
                         animate="visible"
                         variants={staggerContainer}
-                        className="max-w-3xl"
+                        className="max-w-4xl"
                     >
-                        <motion.span variants={fadeInUp} className="inline-flex items-center gap-2 py-1 px-4 rounded-full bg-white/10 border border-white/20 text-sky-400 font-semibold text-sm mb-6 backdrop-blur-md">
-                            {isWholesale ? <Building2 size={14} /> : <Globe size={14} />}
-                            {isWholesale ? 'Wholesale Pricing Active' : 'Global Export Certified'}
-                        </motion.span>
-                        <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white leading-tight mb-6">
-                            {t('welcome')}
+                        <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 py-1.5 px-5 rounded-full bg-white/10 border border-white/20 text-sky-400 font-bold text-xs mb-8 backdrop-blur-xl tracking-wider uppercase">
+                            <Sparkles size={14} className="animate-pulse" />
+                            {isWholesale ? 'Premium Wholesale Partner' : 'Sustainable Seafood Global Leader'}
+                        </motion.div>
+
+                        <motion.h1 variants={fadeInUp} className="text-6xl md:text-8xl lg:text-[100px] font-display font-black text-white leading-[0.9] mb-8 tracking-tighter">
+                            {t('welcome').split(' ').map((word, i) => (
+                                <span key={i} className={i === 1 ? "text-sky-500 block" : "block"}>{word}</span>
+                            ))}
                         </motion.h1>
-                        <motion.p variants={fadeInUp} className="text-xl text-gray-200 mb-10 font-light leading-relaxed max-w-2xl bg-black/20 p-4 rounded-xl backdrop-blur-sm border border-white/5">
-                            From the pristine waters of the Pacific to your doorstep. We utilize AI-driven logistics to ensure
-                            <span className="text-sky-400 font-semibold"> 24-hour delivery</span> anywhere in the world.
+
+                        <motion.p variants={fadeInUp} className="text-lg md:text-xl text-slate-300 mb-12 font-medium leading-relaxed max-w-2xl">
+                            From the pristine waters of the Pacific to your table. We utilize AI-optimized logistics to ensure
+                            <span className="text-white border-b-2 border-sky-500 ml-1"> 24-hour global delivery</span>.
                         </motion.p>
-                        <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
-                            <Link to="/products" className="btn btn-primary text-lg px-8 py-4 rounded-full">
+
+                        <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-6">
+                            <Link to="/products" className="group flex items-center justify-center gap-3 bg-sky-500 hover:bg-sky-400 text-slate-900 text-lg px-10 py-5 rounded-3xl font-black transition-all shadow-2xl shadow-sky-500/20 hover:shadow-sky-500/40 transform hover:-translate-y-1">
                                 {t('order')}
-                                <ArrowRight className="w-5 h-5" />
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
-                            <Link to="/about" className="btn px-8 py-4 bg-white/10 text-white hover:bg-white/20 hover:backdrop-blur-lg border border-white/20 rounded-full font-semibold">
+                            <Link to="/about" className="flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 px-10 py-5 rounded-3xl font-bold backdrop-blur-xl transition-all">
                                 {t('explore')}
                             </Link>
                         </motion.div>
@@ -162,94 +176,138 @@ const Home = () => {
                 </div>
 
                 <motion.div
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.5, duration: 0.8 }}
-                    className="absolute bottom-10 right-4 md:right-10 bg-white/10 backdrop-blur-xl p-8 rounded-3xl border border-white/20 hidden lg:block shadow-2xl"
+                    initial={{ y: 100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.8, duration: 1 }}
+                    className="absolute bottom-12 right-12 hidden xl:flex gap-8"
                 >
-                    <div className="flex gap-12">
-                        <div className="text-center">
-                            <div className="text-4xl font-bold text-white mb-1">50+</div>
-                            <div className="text-xs text-sky-400 uppercase tracking-widest font-bold">Countries</div>
-                        </div>
-                        <div className="w-px bg-white/20"></div>
-                        <div className="text-center">
-                            <div className="text-4xl font-bold text-white mb-1">24h</div>
-                            <div className="text-xs text-sky-400 uppercase tracking-widest font-bold">Delivery</div>
+                    <div className="bg-white/5 backdrop-blur-xl p-8 rounded-[40px] border border-white/10 shadow-2xl">
+                        <div className="flex gap-16 items-center">
+                            <div className="text-center">
+                                <div className="text-5xl font-black text-white mb-2 font-display tracking-tighter">50+</div>
+                                <div className="text-[10px] text-sky-500 uppercase tracking-[0.2em] font-black">Countries</div>
+                            </div>
+                            <div className="w-px h-16 bg-white/10"></div>
+                            <div className="text-center">
+                                <div className="text-5xl font-black text-white mb-2 font-display tracking-tighter">24h</div>
+                                <div className="text-[10px] text-sky-500 uppercase tracking-[0.2em] font-black">Ship Time</div>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
             </section>
 
-            {/* Stats Section */}
-            <section className="py-16 bg-white border-b border-gray-100">
+            {/* Why Choose Us */}
+            <section className="py-32 bg-white relative">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <motion.div
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        variants={staggerContainer}
-                        className="grid grid-cols-2 md:grid-cols-4 gap-8"
-                    >
-                        <StatCard number="10K+" label="Happy Customers" delay={0.1} />
-                        <StatCard number="50+" label="Countries Served" delay={0.2} />
-                        <StatCard number="24/7" label="Customer Support" delay={0.3} />
-                        <StatCard number="100%" label="Fresh Guarantee" delay={0.4} />
-                    </motion.div>
+                    <div className="flex flex-col lg:flex-row gap-20 items-center">
+                        <div className="lg:w-1/2">
+                            <span className="text-sky-500 font-black tracking-[0.3em] text-xs uppercase mb-4 block">The SeamanFresh Standard</span>
+                            <h2 className="text-5xl md:text-6xl font-display font-black text-slate-900 mb-8 tracking-tighter leading-none">
+                                Raising the bar for <span className="text-sky-500">Freshness.</span>
+                            </h2>
+                            <p className="text-slate-500 text-lg leading-relaxed mb-12">
+                                We've revolutionized seafood logistics by bridging the gap between artisanal fisheries and global kitchens, maintaining the cold chain unbroken across oceans.
+                            </p>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="flex gap-4 p-6 rounded-3xl bg-slate-50 border border-slate-100 items-start">
+                                    <div className="bg-sky-500 text-white p-2 rounded-xl shadow-lg shadow-sky-500/20">
+                                        <CheckCircle size={20} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-slate-900 mb-1">Cold-Chain Only</h4>
+                                        <p className="text-xs text-slate-500">Temperature monitored 24/7</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4 p-6 rounded-3xl bg-slate-50 border border-slate-100 items-start">
+                                    <div className="bg-sky-500 text-white p-2 rounded-xl shadow-lg shadow-sky-500/20">
+                                        <CheckCircle size={20} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-slate-900 mb-1">Source Verified</h4>
+                                        <p className="text-xs text-slate-500">Full traceability for every catch</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="lg:w-1/2 relative">
+                            <div className="relative z-10 rounded-[60px] overflow-hidden shadow-3xl">
+                                <img
+                                    src="https://images.unsplash.com/photo-1559737558-2f5a35f4524b?auto=format&fit=crop&q=80"
+                                    alt="Fresh Fish"
+                                    className="w-full h-[600px] object-cover"
+                                />
+                            </div>
+                            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-sky-500 rounded-[50px] -z-0"></div>
+                            <div className="absolute -top-10 -left-10 w-40 h-40 bg-slate-900 rounded-[40px] -z-0"></div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            {/* AI Recommendations */}
-            <section className="py-24 bg-gray-50">
+            {/* Recommendations */}
+            <section className="py-32 bg-slate-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-3 bg-sky-500/10 rounded-2xl text-sky-500">
-                                <Sparkles className="w-8 h-8" />
-                            </div>
-                            <div>
-                                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{t('rec')}</h2>
-                                <p className="text-gray-500 mt-1">Curated specifically for your taste</p>
-                            </div>
+                    <div className="flex justify-between items-end mb-16">
+                        <div>
+                            <span className="text-sky-500 font-black tracking-[0.3em] text-xs uppercase mb-3 block">Market View</span>
+                            <h2 className="text-4xl md:text-5xl font-display font-black text-slate-900 tracking-tight">{t('rec')}</h2>
                         </div>
-                        <Link to="/products" className="text-sky-500 font-bold hover:text-sky-700 flex items-center gap-2 group">
-                            View All <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        <Link to="/products" className="hidden sm:flex items-center gap-3 text-slate-900 font-bold hover:text-sky-500 transition-colors bg-white px-8 py-4 rounded-3xl shadow-sm">
+                            Full Catalog <ArrowRight size={18} />
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                         {recommendedProducts.map((product, index) => (
                             <motion.div
                                 key={product.id}
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
                                 viewport={{ once: true }}
-                                className="group relative bg-white rounded-3xl p-4 transition-all hover:shadow-xl hover:shadow-ocean/10 border border-gray-100"
+                                className="group bg-white rounded-[48px] p-6 shadow-sm hover:shadow-2xl hover:shadow-sky-500/5 transition-all duration-500 border border-slate-100"
                             >
-                                <div className="absolute top-6 right-6 bg-white/95 backdrop-blur rounded-full px-3 py-1 text-xs font-bold text-sky-500 shadow-lg z-10 border border-sky-500/10">
-                                    {index === 0 ? 'Best Match 98%' : 'Trending'}
-                                </div>
-                                <div className="h-64 rounded-2xl overflow-hidden mb-5 relative">
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="h-[300px] rounded-[40px] overflow-hidden mb-8 relative">
+                                    <div className="absolute top-6 left-6 z-20">
+                                        <div className="bg-white/90 backdrop-blur-md text-sky-600 text-[10px] font-black px-4 py-2 rounded-full shadow-sm tracking-widest uppercase">
+                                            {product.category || 'Premium'}
+                                        </div>
+                                    </div>
                                     <img
-                                        src={product.image_url ? `${API_URL}${product.image_url}` : 'https://placehold.co/400x300?text=Seafood'}
+                                        src={product.image ? (product.image.startsWith('http') ? product.image : `${API_URL}${product.image}`) : 'https://placehold.co/400x300?text=SeamanFresh'}
                                         alt={product.name}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                     <button
                                         onClick={() => handleAddToCart(product)}
-                                        className="absolute bottom-4 right-4 z-20 bg-white text-sky-500 w-12 h-12 rounded-full flex items-center justify-center font-bold shadow-lg transform translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-sky-500 hover:text-white"
+                                        className="absolute bottom-6 right-6 z-20 bg-slate-900 text-white w-16 h-16 rounded-[28px] flex items-center justify-center shadow-2xl transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-sky-500"
                                     >
-                                        <ShoppingCart size={20} />
+                                        <ShoppingCart size={24} />
                                     </button>
                                 </div>
-                                <h3 className="font-bold text-xl mb-2 text-slate-900">{product.name}</h3>
-                                <p className="text-gray-500 text-sm mb-4 line-clamp-2">Premium quality {product.category || 'seafood'} sourced directly.</p>
-                                <div className="flex items-center justify-between border-t border-gray-50 pt-4">
-                                    <span className="text-2xl font-bold text-slate-900">{formatPrice(product.price)}</span>
-                                    <div className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
-                                        <Star size={14} fill="currentColor" /> 4.9
+
+                                <div className="px-2">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <h3 className="font-black text-2xl text-slate-900">{product.name}</h3>
+                                        <div className="flex items-center gap-1.5 bg-amber-50 text-amber-500 px-3 py-1.5 rounded-2xl font-black text-xs">
+                                            <Star size={14} fill="currentColor" /> 4.9
+                                        </div>
+                                    </div>
+                                    <p className="text-slate-500 text-sm mb-8 line-clamp-2 leading-relaxed h-10">Our finest {product.name}, hand-selected and flash-frozen within hours of harvest.</p>
+
+                                    <div className="flex items-center justify-between pt-6 border-t border-slate-50">
+                                        <div>
+                                            <span className="text-3xl font-black text-slate-900 tracking-tighter">
+                                                {getFinalPrice(product.price)}
+                                            </span>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">/ KG</span>
+                                        </div>
+                                        <Link to={`/product/${product.id}`} className="text-sky-500 font-black text-xs uppercase tracking-widest hover:underline">
+                                            Details
+                                        </Link>
                                     </div>
                                 </div>
                             </motion.div>
@@ -258,178 +316,50 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Why Choose Us */}
-            <section className="py-24 bg-white relative overflow-hidden">
-                <div className="absolute -left-20 top-20 w-96 h-96 bg-sky-500/5 rounded-full blur-3xl"></div>
+            {/* Global Infrastructure Section */}
+            <section className="py-32 bg-slate-900 text-white overflow-hidden relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-10">
+                    <img src="https://www.transparenttextures.com/patterns/asfalt-dark.png" alt="pattern" className="w-full h-full object-cover" />
+                </div>
+
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center mb-16">
-                        <span className="text-sky-500 font-bold tracking-widest text-sm uppercase mb-3 block">Our Promise</span>
-                        <h2 className="text-4xl md:text-5xl font-display font-bold text-slate-900 mb-6">
-                            Why Choose <span className="text-sky-500">SeamanFresh</span>
+                    <div className="flex flex-col items-center text-center mb-24">
+                        <span className="text-sky-500 font-bold tracking-[0.4em] text-xs uppercase mb-6 block">Supply Chain AI</span>
+                        <h2 className="text-5xl md:text-7xl font-display font-black mb-8 tracking-tighter leading-none">
+                            Freshness at the <br />Speed of <span className="text-sky-500 underline decoration-sky-500/30 underline-offset-8">Light.</span>
                         </h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-                            We're committed to delivering the freshest seafood with unmatched quality and service
+                        <p className="max-w-3xl text-slate-400 text-xl font-medium leading-relaxed">
+                            Our proprietary AI logistics engine predicts ocean patterns and flight schedules to carve the fastest path from fisherman to table.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <FeatureCard
-                            icon={<ShieldCheck className="w-12 h-12 text-sky-500" />}
-                            title="Quality Guaranteed"
-                            description="100% fresh guarantee with rigorous quality checks at every step"
-                            delay={0.1}
-                        />
-                        <FeatureCard
-                            icon={<Truck className="w-12 h-12 text-sky-500" />}
-                            title="Fast Delivery"
-                            description="24-hour cold-chain delivery to preserve freshness worldwide"
-                            delay={0.2}
-                        />
-                        <FeatureCard
-                            icon={<Award className="w-12 h-12 text-sky-500" />}
-                            title="Certified Suppliers"
-                            description="Partnered with certified fisheries following sustainable practices"
-                            delay={0.3}
-                        />
-                    </div>
-                </div>
-            </section>
-
-            {/* Global Reach */}
-            <section className="py-32 bg-slate-900 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg')] bg-no-repeat bg-center bg-contain pointer-events-none"></div>
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="grid md:grid-cols-2 gap-16 items-center">
-                        <motion.div
-                            initial={{ opacity: 0, x: -50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                        >
-                            <span className="text-sky-400 font-bold tracking-widest uppercase text-sm mb-4 block">International Logistics</span>
-                            <h2 className="text-4xl md:text-6xl font-display font-bold text-white mb-8 leading-tight">
-                                Serving <span className="text-sky-500">120+ Cities</span> Worldwide
-                            </h2>
-                            <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-                                Our verified supply chain spans across continents ensuring that you get the same premium quality whether you are in Tokyo, New York, or London.
-                            </p>
-                            <div className="flex gap-4">
-                                <button className="btn btn-primary">View Coverage Map</button>
-                                <button className="btn btn-outline border-white text-white hover:bg-white hover:text-slate-900">Contact Sales</button>
+                        <div className="bg-white/5 border border-white/10 p-12 rounded-[50px] backdrop-blur-3xl hover:bg-white/10 transition-all group">
+                            <div className="w-16 h-16 bg-sky-500 rounded-3xl flex items-center justify-center mb-10 shadow-2xl shadow-sky-500/20 group-hover:scale-110 transition-transform">
+                                <Globe size={32} />
                             </div>
-                        </motion.div>
-
-                        <div className="grid grid-cols-1 gap-6">
-                            <FeatureCard
-                                icon={<Globe className="w-8 h-8 text-sky-500" />}
-                                title="Global Tracking"
-                                desc="Real-time satellite tracking for every shipment from port to plate."
-                                dark
-                            />
-                            <FeatureCard
-                                icon={<Truck className="w-8 h-8 text-sky-500" />}
-                                title="Express Shipping"
-                                desc="Priority cold-chain logistics ensuring 24-hour delivery worldwide."
-                                dark
-                            />
+                            <h3 className="text-3xl font-black mb-4 tracking-tight">120+ Cities</h3>
+                            <p className="text-slate-400 leading-relaxed font-medium">Fully operational distribution hubs in 6 continents ensuring local delivery speed on a global scale.</p>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Testimonials */}
-            <section className="py-24 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-display font-bold text-slate-900 mb-4">
-                            What Our Customers Say
-                        </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <TestimonialCard
-                            name="Sarah Johnson"
-                            role="Restaurant Owner"
-                            text="The quality is outstanding! My customers love the fresh seafood, and the wholesale pricing helps my business thrive."
-                            rating={5}
-                            delay={0.1}
-                        />
-                        <TestimonialCard
-                            name="Michael Chen"
-                            role="Home Chef"
-                            text="Fast delivery and always fresh. I've been ordering for months and never disappointed. Highly recommend!"
-                            rating={5}
-                            delay={0.2}
-                        />
-                        <TestimonialCard
-                            name="Emma Williams"
-                            role="Hotel Manager"
-                            text="Reliable supplier with consistent quality. The 24-hour delivery is a game-changer for our kitchen operations."
-                            rating={5}
-                            delay={0.3}
-                        />
+                        <div className="bg-white/5 border border-white/10 p-12 rounded-[50px] backdrop-blur-3xl hover:bg-white/10 transition-all group">
+                            <div className="w-16 h-16 bg-sky-500 rounded-3xl flex items-center justify-center mb-10 shadow-2xl shadow-sky-500/20 group-hover:scale-110 transition-transform">
+                                <ShieldCheck size={32} />
+                            </div>
+                            <h3 className="text-3xl font-black mb-4 tracking-tight">100% Secure</h3>
+                            <p className="text-slate-400 leading-relaxed font-medium">Smart packaging with active sensors monitors temperature and humidity every second of the journey.</p>
+                        </div>
+                        <div className="bg-white/5 border border-white/10 p-12 rounded-[50px] backdrop-blur-3xl hover:bg-white/10 transition-all group">
+                            <div className="w-16 h-16 bg-sky-500 rounded-3xl flex items-center justify-center mb-10 shadow-2xl shadow-sky-500/20 group-hover:scale-110 transition-transform">
+                                <Truck size={32} />
+                            </div>
+                            <h3 className="text-3xl font-black mb-4 tracking-tight">Carbon Neutral</h3>
+                            <p className="text-slate-400 leading-relaxed font-medium">We offset 100% of carbon emissions from our shipping through marine conservation projects.</p>
+                        </div>
                     </div>
                 </div>
             </section>
         </div>
     );
 };
-
-// Sub-components with animations
-const StatCard = ({ number, label, delay }) => (
-    <motion.div
-        variants={{
-            hidden: { opacity: 0, y: 20 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay } }
-        }}
-        className="text-center group cursor-default"
-    >
-        <div className="text-4xl md:text-5xl font-bold text-sky-500 mb-2 group-hover:scale-110 transition-transform duration-300">{number}</div>
-        <div className="text-gray-600 font-medium tracking-wide uppercase text-sm">{label}</div>
-    </motion.div>
-);
-
-const FeatureCard = ({ icon, title, desc, description, delay, dark }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay }}
-        className={`${dark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-100 hover:shadow-xl hover:shadow-ocean/5'} border p-8 rounded-3xl transition-all duration-300`}
-    >
-        <div className="bg-sky-500/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-sky-500">
-            {icon}
-        </div>
-        <h3 className={`text-xl font-bold mb-3 ${dark ? 'text-white' : 'text-slate-900'}`}>{title}</h3>
-        <p className={`${dark ? 'text-gray-400' : 'text-gray-500'} leading-relaxed`}>{desc || description}</p>
-    </motion.div>
-);
-
-const TestimonialCard = ({ name, role, text, rating, delay }) => (
-    <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay }}
-        className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 relative group"
-    >
-        <Quote className="text-sky-500/10 absolute top-8 right-8 group-hover:text-sky-500/20 transition-colors" size={60} />
-        <div className="flex items-center gap-1 mb-6">
-            {[...Array(rating)].map((_, i) => (
-                <Star key={i} size={18} fill="#FFB703" className="text-[#FFB703]" />
-            ))}
-        </div>
-        <p className="text-gray-700 mb-8 leading-relaxed text-lg italic">"{text}"</p>
-        <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-xl font-bold text-gray-400">
-                {name.charAt(0)}
-            </div>
-            <div>
-                <div className="font-bold text-slate-900">{name}</div>
-                <div className="text-sm text-gray-500">{role}</div>
-            </div>
-        </div>
-    </motion.div>
-);
 
 export default Home;

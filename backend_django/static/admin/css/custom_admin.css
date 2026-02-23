@@ -1,0 +1,138 @@
+/* Seaman Fresh Elite Admin Styling */
+:root {
+    --primary: #0EA5E9;
+    --primary-dark: #0284C7;
+    --midnight: #0F172A;
+    --slate-700: #334155;
+    --slate-800: #1E293B;
+    --slate-900: #0F172A;
+    --white: #ffffff;
+}
+
+/* Header & Brand */
+#header {
+    background: var(--midnight) !important;
+    color: var(--white) !important;
+    padding: 15px 40px !important;
+    border-bottom: 2px solid var(--primary) !important;
+}
+
+#branding h1 {
+    color: var(--white) !important;
+    font-weight: 900 !important;
+    letter-spacing: -1px !important;
+    text-transform: uppercase !important;
+}
+
+#branding h1 a {
+    color: var(--white) !important;
+}
+
+#branding h1 span {
+    color: var(--primary) !important;
+}
+
+/* Sidebar & Navigation */
+.module h2,
+.module caption,
+.inline-group h2 {
+    background: var(--slate-800) !important;
+    color: var(--primary) !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-size: 11px !important;
+}
+
+div.breadcrumbs {
+    background: var(--white) !important;
+    border-bottom: 1px solid #eee !important;
+    padding: 10px 40px !important;
+    font-size: 12px !important;
+}
+
+/* Buttons */
+.button,
+input[type=submit],
+input[type=button],
+.submit-row input,
+a.button {
+    background: var(--midnight) !important;
+    border-radius: 8px !important;
+    padding: 10px 20px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+}
+
+.button:hover,
+input[type=submit]:hover,
+input[type=button]:hover {
+    background: var(--primary) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
+}
+
+.button.default,
+input[type=submit].default {
+    background: var(--primary) !important;
+}
+
+.button.default:hover,
+input[type=submit].default:hover {
+    background: var(--primary-dark) !important;
+}
+
+/* Form Elements */
+input[type=text],
+input[type=password],
+input[type=email],
+input[type=url],
+input[type=number],
+textarea,
+select {
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 10px !important;
+    transition: all 0.2s ease !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary) !important;
+    outline: 2px solid var(--primary) !important;
+    outline-offset: -2px !important;
+}
+
+/* Table */
+table thead th {
+    background: #f8fafc !important;
+    color: var(--slate-700) !important;
+    font-weight: 800 !important;
+}
+
+/* Dashboard Modules */
+.module {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: 1px solid #eee !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 25px !important;
+}
+
+/* User Links */
+#user-tools {
+    font-weight: 600 !important;
+}
+
+#user-tools a {
+    color: var(--primary) !important;
+    transition: opacity 0.2s !important;
+}
+
+#user-tools a:hover {
+    opacity: 0.8 !important;
+}

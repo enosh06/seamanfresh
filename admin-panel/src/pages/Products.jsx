@@ -17,7 +17,7 @@ const Products = () => {
     const fetchProducts = async () => {
         try {
             const res = await api.get('/products');
-            setProducts(res.data);
+            setProducts(res.data.results || res.data);
         } catch (err) {
             console.error(err);
         }
@@ -54,7 +54,7 @@ const Products = () => {
         const lowVal = Math.max(0, (parseInt(threshold) || 5) - 1); // Set to 1 below threshold
         if (window.confirm(`Set stock to ${lowVal} (Low Stock) for testing?`)) {
             try {
-                await api.patch(`/products/${id}/stock`,
+                await api.patch(`/products/${id}/stock/`,
                     { stock_quantity: lowVal }
                 );
                 fetchProducts();
@@ -69,7 +69,7 @@ const Products = () => {
         if (currentStock === 0) return; // Already out of stock
         if (window.confirm('Mark this product as Out of Stock?')) {
             try {
-                await api.patch(`/products/${id}/stock`,
+                await api.patch(`/products/${id}/stock/`,
                     { stock_quantity: 0 }
                 );
                 fetchProducts();
@@ -101,8 +101,8 @@ const Products = () => {
 
         try {
             if (editingProduct) {
-                if (!image && editingProduct.image_url) {
-                    data.append('image_url', editingProduct.image_url);
+                if (!image && editingProduct.image) {
+                    data.append('image', editingProduct.image);
                 }
                 await api.put(`/products/${editingProduct.id}`, data);
             } else {
@@ -152,7 +152,7 @@ const Products = () => {
                             <tr key={p.id}>
                                 <td style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                     <img
-                                        src={p.image_url ? `${API_URL}${p.image_url}` : 'https://placehold.co/50x50?text=Fish'}
+                                        src={p.image ? (p.image.startsWith('http') ? p.image : `${API_URL}${p.image}`) : 'https://placehold.co/50x50?text=Fish'}
                                         alt=""
                                         style={{ width: '48px', height: '48px', borderRadius: '10px', objectFit: 'cover', border: '1px solid var(--border)' }}
                                     />
@@ -297,7 +297,7 @@ const Products = () => {
                                     <span>{image ? image.name : 'Upload Product Image'}</span>
                                 </label>
                                 <input type="file" onChange={(e) => setImage(e.target.files[0])} style={{ display: 'none' }} />
-                                {editingProduct && !image && editingProduct.image_url && (
+                                {editingProduct && !image && editingProduct.image && (
                                     <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px' }}>
                                         Current image exists. Upload new one to replace.
                                     </p>

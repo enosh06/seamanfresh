@@ -21,10 +21,6 @@ const Checkout = React.lazy(() => import('./pages/Checkout'));
 const Login = React.lazy(() => import('./pages/Login'));
 const Signup = React.lazy(() => import('./pages/Signup'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
-const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
-const AdminProducts = React.lazy(() => import('./pages/AdminProducts'));
-const AdminOrders = React.lazy(() => import('./pages/AdminOrders'));
-const AdminSettings = React.lazy(() => import('./pages/AdminSettings'));
 const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
 const UserSettings = React.lazy(() => import('./pages/UserSettings'));
 const Contact = React.lazy(() => import('./pages/Contact'));
@@ -33,7 +29,7 @@ const AdminMessages = React.lazy(() => import('./pages/AdminMessages'));
 // Route Guards
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return null; // Or a loading spinner
+  if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
   return children;
 };
@@ -59,8 +55,8 @@ const PageTransition = ({ children }) => {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      style={{ width: '100%', height: '100%' }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      className="w-full h-full"
     >
       {children}
     </motion.div>
@@ -90,10 +86,6 @@ const AnimatedRoutes = () => {
         <Route path="/settings" element={<ProtectedRoute><PageTransition><UserSettings /></PageTransition></ProtectedRoute>} />
 
         {/* Admin Private Routes */}
-        <Route path="/admin" element={<AdminRoute><PageTransition><AdminDashboard /></PageTransition></AdminRoute>} />
-        <Route path="/admin/products" element={<AdminRoute><PageTransition><AdminProducts /></PageTransition></AdminRoute>} />
-        <Route path="/admin/orders" element={<AdminRoute><PageTransition><AdminOrders /></PageTransition></AdminRoute>} />
-        <Route path="/admin/settings" element={<AdminRoute><PageTransition><AdminSettings /></PageTransition></AdminRoute>} />
         <Route path="/admin/messages" element={<AdminRoute><PageTransition><AdminMessages /></PageTransition></AdminRoute>} />
       </Routes>
     </AnimatePresence>
@@ -108,10 +100,15 @@ const App = () => {
       <ScrollToTop />
       <AuthProvider>
         <CartProvider>
-          <div className="app-wrapper bg-surface" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <div className="flex flex-col min-h-screen bg-white">
             <Navbar />
-            <main style={{ flex: 1 }}>
-              <React.Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><LoadingSpinner /></div>}>
+            <main className="flex-grow pt-24 lg:pt-32">
+              <React.Suspense fallback={
+                <div className="flex flex-col items-center justify-center h-[70vh] gap-4">
+                  <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Decoding Freshness...</span>
+                </div>
+              }>
                 <AnimatedRoutes />
               </React.Suspense>
             </main>

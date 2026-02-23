@@ -10,7 +10,7 @@ const Orders = () => {
     const fetchOrders = async () => {
         try {
             const res = await api.get(`/orders?_t=${Date.now()}`);
-            setOrders(res.data);
+            setOrders(res.data.results || res.data);
         } catch (err) {
             console.error(err);
         } finally {
@@ -194,7 +194,7 @@ const Orders = () => {
                                 {selectedOrder.items && selectedOrder.items.map((item, idx) => (
                                     <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
                                         <td style={{ padding: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <img src={`${API_URL}${item.image_url}`} alt={item.name} style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }} />
+                                            <img src={item.image ? (item.image.startsWith('http') ? item.image : `${API_URL}${item.image}`) : 'https://placehold.co/40x40?text=Fish'} alt={item.name} style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }} />
                                             {item.name}
                                         </td>
                                         <td style={{ padding: '8px', textAlign: 'center' }}>{item.quantity} kg</td>
