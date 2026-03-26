@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', os.getenv('JWT_SECRET', 'django-inse
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.pythonanywhere.com').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.pythonanywhere.com,.netlify.app').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.staticfiles',
@@ -29,7 +29,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174').split(',')
+CORS_ALLOWED_ORIGINS = os.getenv(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,'
+    'https://seaman-fresh-client.netlify.app,https://seaman-fresh-admin.netlify.app'
+).split(',')
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     "DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT",
@@ -39,7 +43,11 @@ CORS_ALLOW_HEADERS = [
     "dnt", "origin", "user-agent", "x-csrftoken", "x-requested-with",
 ]
 
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:5173,http://localhost:5174').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://localhost:5173,http://localhost:5174,'
+    'https://seaman-fresh-client.netlify.app,https://seaman-fresh-admin.netlify.app'
+).split(',')
 
 ROOT_URLCONF = 'core.urls'
 
