@@ -10,7 +10,6 @@ const FixedPanelLink = () => {
             style={{
                 position: 'fixed',
                 bottom: '30px',
-                bottom: '30px',
                 left: '30px',
                 width: '60px',
                 height: '60px',

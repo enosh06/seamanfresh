@@ -6,6 +6,8 @@ python-dotenv
 whitenoise
 pillow
 gunicorn
+dj-database-url
+setuptools
 
 # Serverless (Deployment to AWS Lambda)
 # zappa

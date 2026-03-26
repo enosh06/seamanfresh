@@ -38,4 +38,10 @@ echo Note: Using JSON-based storage for high speed and zero database setup.
 echo Business data: backend_django/api/data/*.json
 echo Orders are handled via WhatsApp for serverless simplicity.
 echo ==========================================
+echo ==========================================
+echo.
+echo [NEW] SINGLE FILE MODE:
+echo 1. Backend: python backend.py
+echo 2. Frontend: Open frontend.html in your browser
+echo.
 pause

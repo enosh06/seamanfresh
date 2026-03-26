@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeamanFresh | One-File Experience</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Outfit', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        sky: { 500: '#0ea5e9', 400: '#38bdf8', 600: '#0284c7' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- React & Dependencies -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { -webkit-font-smoothing: antialiased; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { motion, AnimatePresence } = FramerMotion;
+
+        // --- MOCK API CONFIG ---
+        const API_BASE = "http://localhost:8000/api";
+
+        // --- COMPONENTS ---
+        const Icon = ({ name, className, size = 24 }) => {
+            const [svg, setSvg] = useState('');
+            useEffect(() => {
+                if (window.lucide) {
+                    const icon = window.lucide.icons[name];
+                    if (icon) setSvg(icon.toSvg({ class: className, width: size, height: size }));
+                }
+            }, [name, className, size]);
+            return <span dangerouslySetInnerHTML={{ __html: svg }} />;
+        };
+
+        const Layout = ({ children, cartCount, setPage, user }) => (
+            <div className="flex flex-col min-h-screen">
+                <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+                    <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setPage('home')}>
+                            <div className="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center text-white shadow-lg">
+                                <Icon name="Ship" size={20} />
+                            </div>
+                            <span className="font-display font-black text-2xl tracking-tighter text-slate-900">SEAMAN<span className="text-sky-500">FRESH</span></span>
+                        </div>
+                        <div className="flex items-center gap-8">
+                            <button onClick={() => setPage('products')} className="font-bold text-slate-600 hover:text-sky-500 transition-colors">Shop</button>
+                            <button onClick={() => setPage('about')} className="font-bold text-slate-600 hover:text-sky-500 transition-colors">Our Story</button>
+                            {user ? (
+                                <button onClick={() => setPage('admin')} className="font-bold text-sky-500 flex items-center gap-2 bg-sky-50 px-4 py-2 rounded-xl">
+                                    <Icon name="Shield" size={16} /> Admin
+                                </button>
+                            ) : (
+                                <button onClick={() => setPage('admin-login')} className="font-bold text-slate-400 hover:text-slate-900">Login</button>
+                            )}
+                            <button onClick={() => setPage('cart')} className="relative p-2 text-slate-900 hover:bg-slate-100 rounded-full">
+                                <Icon name="ShoppingBag" />
+                                {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-sky-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{cartCount}</span>}
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+                <main className="flex-grow pt-20">{children}</main>
+                <footer className="bg-slate-900 text-white py-20 px-4">
+                    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+                        <div className="col-span-2">
+                            <span className="font-display font-black text-3xl tracking-tighter mb-6 block">SEAMAN<span className="text-sky-500">FRESH</span></span>
+                            <p className="text-slate-400 max-w-sm mb-8 text-lg">Delivering the ocean's finest catches to your doorstep with AI-powered logistics.</p>
+                        </div>
+                        <div>
+                            <h4 className="font-black uppercase tracking-widest text-xs text-sky-500 mb-6">Company</h4>
+                            <div className="flex flex-col gap-4 text-slate-400 font-medium">
+                                <a>Sustainability</a><a>Certifications</a><a>Privacy Policy</a>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 className="font-black uppercase tracking-widest text-xs text-sky-500 mb-6">Support</h4>
+                            <div className="flex flex-col gap-4 text-slate-400 font-medium">
+                                <a>Order Tracking</a><a>WhatsApp Support</a><a>FAQs</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        );
+
+        // --- PAGES ---
+        const HomePage = ({ setPage }) => (
+            <section className="relative min-h-[90vh] flex items-center bg-slate-900 overflow-hidden px-4">
+                <div className="absolute inset-0 opacity-40">
+                    <img src="https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&q=80" className="w-full h-full object-cover" />
+                </div>
+                <div className="max-w-7xl mx-auto w-full relative z-10">
+                    <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+                        <div className="inline-block px-6 py-2 rounded-full border border-sky-400/30 bg-sky-400/10 text-sky-400 font-black text-[10px] uppercase tracking-[0.2em] mb-8">Premium Seafood Global</div>
+                        <h1 className="text-6xl md:text-9xl font-display font-black text-white leading-none mb-8 tracking-tighter">
+                            FRESHNESS <br /><span className="text-sky-500">DEFINED.</span>
+                        </h1>
+                        <p className="text-xl text-slate-300 max-w-2xl mb-12 font-medium">From the deep ocean to your kitchen in under 24 hours. Experience the pinnacle of seafood quality.</p>
+                        <div className="flex gap-4">
+                            <button onClick={() => setPage('products')} className="bg-sky-500 hover:bg-sky-400 text-slate-900 font-black px-10 py-5 rounded-[32px] transition-all transform hover:-translate-y-1 shadow-2xl shadow-sky-500/20">Explore Catalog</button>
+                        </div>
+                    </motion.div>
+                </div>
+            </section>
+        );
+
+        const ProductsPage = ({ addToCart }) => {
+            const [products, setProducts] = useState([
+                { id: 1, name: 'King Salmon', price: 45, category: 'Fish', image: 'https://images.unsplash.com/photo-1599084993091-1cb5c0721cc6?auto=format&fit=crop&q=80' },
+                { id: 2, name: 'Tiger Prawns', price: 32, category: 'Shellfish', image: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&q=80' },
+                { id: 3, name: 'Atlantic Cod', price: 28, category: 'Fish', image: 'https://images.unsplash.com/photo-1534604973900-c41ab4c287ba?auto=format&fit=crop&q=80' }
+            ]);
+            return (
+                <div className="max-w-7xl mx-auto px-4 py-20">
+                    <h2 className="text-5xl font-display font-black text-slate-900 mb-12 tracking-tight">Today's <span className="text-sky-500">Catches.</span></h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                        {products.map(p => (
+                            <div key={p.id} className="group bg-white rounded-[48px] p-6 border border-slate-100 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-500">
+                                <div className="h-[300px] rounded-[40px] overflow-hidden mb-8 relative">
+                                    <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                    <div className="absolute top-6 left-6 bg-white/90 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-sky-600">{p.category}</div>
+                                </div>
+                                <div className="px-2 flex justify-between items-end">
+                                    <div>
+                                        <h3 className="text-2xl font-black text-slate-900 mb-2">{p.name}</h3>
+                                        <p className="text-3xl font-black text-sky-500 tracking-tighter">${p.price}<span className="text-sm text-slate-400">/kg</span></p>
+                                    </div>
+                                    <button onClick={() => addToCart(p)} className="bg-slate-900 text-white w-14 h-14 rounded-2xl flex items-center justify-center hover:bg-sky-500 transition-colors">
+                                        <Icon name="Plus" size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const MainApp = () => {
+            const [page, setPage] = useState('home');
+            const [cart, setCart] = useState([]);
+            const [user, setUser] = useState(JSON.parse(localStorage.getItem('admin_user')));
+
+            const addToCart = (product) => {
+                setCart(prev => [...prev, product]);
+                alert(`${product.name} added to cart!`);
+            };
+
+            const renderPage = () => {
+                switch(page) {
+                    case 'home': return <HomePage setPage={setPage} />;
+                    case 'products': return <ProductsPage addToCart={addToCart} />;
+                    case 'admin-login': return (
+                        <div className="min-h-[70vh] flex items-center justify-center">
+                            <div className="bg-white p-12 rounded-[40px] shadow-2xl w-full max-w-md border border-slate-100">
+                                <h2 className="text-3xl font-display font-black text-slate-900 mb-8">Admin Access</h2>
+                                <input id="user" type="text" placeholder="Username" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl mb-4 focus:ring-2 ring-sky-500 outline-none" />
+                                <input id="pass" type="password" placeholder="Password" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl mb-8 focus:ring-2 ring-sky-500 outline-none" />
+                                <button onClick={() => {
+                                    const u = document.getElementById('user').value;
+                                    const p = document.getElementById('pass').value;
+                                    if(u === 'admin' && p === 'seaman123') {
+                                        const admin = {name: 'Admin'};
+                                        setUser(admin); localStorage.setItem('admin_user', JSON.stringify(admin));
+                                        setPage('home');
+                                    } else { alert('Invalid'); }
+                                }} className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl hover:bg-sky-500 transition-colors">Login</button>
+                            </div>
+                        </div>
+                    );
+                    default: return <HomePage setPage={setPage} />;
+                }
+            };
+
+            return (
+                <Layout cartCount={cart.length} setPage={setPage} user={user}>
+                    <AnimatePresence mode="wait">
+                        <motion.div key={page} initial={{opacity:0, x: 20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:-20}} transition={{duration:0.3}}>
+                            {renderPage()}
+                        </motion.div>
+                    </AnimatePresence>
+                </Layout>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MainApp />);
+    </script>
+</body>
+</html>

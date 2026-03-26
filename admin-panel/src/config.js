@@ -10,7 +10,7 @@ const isLocalAddress =
 // FORCE LOCAL API URL TO 8000
 const API_URL = import.meta.env.VITE_API_URL || (isLocalAddress
     ? "http://127.0.0.1:8000"
-    : "https://seaman-fresh-api.onrender.com");
+    : "https://enosh642006.pythonanywhere.com");
 
 export const STORE_URL = import.meta.env.VITE_STORE_URL || (isLocalAddress
     ? `http://${hostname}:5173`

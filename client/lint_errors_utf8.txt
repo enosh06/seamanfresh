@@ -1,0 +1,106 @@
+﻿
+> client@0.0.0 lint
+> eslint .
+
+
+C:\enosh\Enosh\smf\client\src\App.jsx
+  3:27  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\components\AdminNotificationSound.jsx
+  1:17  error  'useState' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\components\Navbar.jsx
+   9:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u             no-unused-vars
+  22:13  error  'userType' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\components\SeamanAssistant.jsx
+    1:46  error  'useMemo' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         no-unused-vars
+    8:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          no-unused-vars
+   34:28  error  'formatTotal' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            no-unused-vars
+   83:31  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  81 |
+  82 |         // User Message
+> 83 |         const userMsg = { id: Date.now(), text, sender: 'user', type: 'text' };
+     |                               ^^^^^^^^^^ Cannot call impure function
+  84 |         setMessages(prev => [...prev, userMsg]);
+  85 |         setInput('');
+  86 |         setIsTyping(true);                         react-hooks/purity
+  116:21  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  114 |             setIsTyping(false);
+  115 |             const botMsgs = [{
+> 116 |                 id: Date.now(),
+      |                     ^^^^^^^^^^ Cannot call impure function
+  117 |                 text: response,
+  118 |                 sender: 'bot',
+  119 |                 type: 'text'                                           react-hooks/purity
+  124:25  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  122 |             if (extras?.product) {
+  123 |                 botMsgs.push({
+> 124 |                     id: Date.now() + 1,
+      |                         ^^^^^^^^^^ Cannot call impure function
+  125 |                     type: 'product-card',
+  126 |                     sender: 'bot',
+  127 |                     data: extras.product  react-hooks/purity
+
+C:\enosh\Enosh\smf\client\src\components\ServerStatusBanner.jsx
+  47:18  error  'error' is defined but never used  no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\context\AuthContext.jsx
+   6:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  24:21  error  'setLoading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                      no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\context\CartContext.jsx
+  7:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\enosh\Enosh\smf\client\src\context\CurrencyContext.jsx
+  5:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\enosh\Enosh\smf\client\src\context\LanguageContext.jsx
+  5:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\enosh\Enosh\smf\client\src\context\UserTypeContext.jsx
+  5:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\enosh\Enosh\smf\client\src\pages\About.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\pages\Cart.jsx
+   7:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                  no-unused-vars
+  11:13  error  'getFinalPrice' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  11:54  error  'currency' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u       no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\pages\Checkout.jsx
+    8:10   error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  206:121  error  'API_URL' is not defined                                                       no-undef
+
+C:\enosh\Enosh\smf\client\src\pages\Contact.jsx
+  5:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\pages\Home.jsx
+  10:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\pages\Login.jsx
+  5:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\pages\ProductDetail.jsx
+  1:38  error  'useMemo' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  9:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u   no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\pages\Products.jsx
+   8:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                no-unused-vars
+  15:41  error  'formatTotal' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\enosh\Enosh\smf\client\src\pages\Signup.jsx
+  5:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+Γ£û 31 problems (31 errors, 0 warnings)
+

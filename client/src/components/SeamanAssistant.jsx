@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Fish, ShoppingBag, User, ChefHat, Info, Sparkles, Loader, ShoppingCart, Plus, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';

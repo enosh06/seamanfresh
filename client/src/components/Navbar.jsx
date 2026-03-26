@@ -19,7 +19,7 @@ const Navbar = () => {
 
     const { language, setLanguage } = useLanguage();
     const { currency, setCurrency } = useCurrency();
-    const { userType, setUserType, isWholesale } = useUserType();
+    const { setUserType, isWholesale } = useUserType();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);

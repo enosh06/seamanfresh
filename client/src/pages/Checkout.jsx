@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePrice } from '../hooks/usePrice';
 import { CreditCard, Truck, CheckCircle, Lock, ShieldCheck, ArrowLeft, Package, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import API_URL from '../config';
 
 const Checkout = () => {
     const { cart, subtotal, clearCart } = useCart();
