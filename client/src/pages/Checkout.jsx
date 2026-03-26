@@ -39,9 +39,16 @@ const Checkout = () => {
                 delivery_address: address
             };
 
-            await api.post('/orders', orderData);
+            const response = await api.post('/orders', orderData);
 
             setIsSuccess(true);
+
+            // Open WhatsApp link if provided
+            if (response.data && response.data.whatsapp_link) {
+                setTimeout(() => {
+                    window.open(response.data.whatsapp_link, '_blank');
+                }, 2000);
+            }
 
             // Notification sound
             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
@@ -50,8 +57,8 @@ const Checkout = () => {
 
             clearCart();
             setTimeout(() => {
-                navigate('/dashboard');
-            }, 4000);
+                navigate(response.data.whatsapp_link ? '/' : '/dashboard');
+            }, 5000);
         } catch (err) {
             console.error("Order Failure:", err);
             alert('Order failed to reach our dispatch. Please try again or contact support.');

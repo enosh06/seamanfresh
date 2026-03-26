@@ -1,199 +1,193 @@
-from rest_framework import viewsets, permissions, status, generics
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.auth.models import User
-from .models import Product, Order, Banner, ContactMessage
-from .serializers import (
-    ProductSerializer, OrderSerializer, UserSerializer, 
-    RegisterSerializer, BannerSerializer, ContactMessageSerializer
-)
+from . import data_manager
+from .permissions import SimpleAdminPermission
+import urllib.parse
+import os
 
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
+class MockLoginView(APIView):
+    """
+    Stateless login - just checks for a hardcoded password in .env or default.
+    Useful for 'Database-Free' administration.
+    """
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        
+        # Hardcoded for DB-free mode
+        ADMIN_USER = os.getenv('ADMIN_USER', 'admin')
+        ADMIN_PASS = os.getenv('ADMIN_PASS', 'seaman123')
+        SECRET_TOKEN = os.getenv('ADMIN_SECRET_TOKEN', 'seaman_fresh_admin_2024')
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        serializer = UserSerializer(self.user)
-        data['user'] = serializer.data
-        return data
+        if username == ADMIN_USER and password == ADMIN_PASS:
+            return Response({
+                "access": SECRET_TOKEN,
+                "user": {
+                    "username": ADMIN_USER,
+                    "is_staff": True,
+                    "name": "Seaman Admin"
+                }
+            })
+        return Response({"error": "Invalid credentials for DB-free mode"}, status=status.HTTP_401_UNAUTHORIZED)
 
-class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
-
-class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    permission_classes = (permissions.AllowAny,)
-    serializer_class = RegisterSerializer
-
-class ProfileView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    def get(self, request):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
-
-class BannerViewSet(viewsets.ModelViewSet):
-    queryset = Banner.objects.filter(active=True)
-    serializer_class = BannerSerializer
+class BannerViewSet(viewsets.ViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
-        return [permissions.IsAdminUser()]
+        return [SimpleAdminPermission()]
+    
+    def list(self, request):
+        return Response(data_manager.get_banners())
 
-class ContactMessageViewSet(viewsets.ModelViewSet):
-    queryset = ContactMessage.objects.all()
-    serializer_class = ContactMessageSerializer
+    def create(self, request):
+        banners = data_manager.get_banners()
+        new_banner = request.data
+        new_banner['id'] = len(banners) + 1
+        banners.append(new_banner)
+        data_manager.save_data('banners.json', banners)
+        return Response(new_banner, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, pk=None):
+        banners = data_manager.get_banners()
+        banners = [b for b in banners if str(b['id']) != str(pk)]
+        data_manager.save_data('banners.json', banners)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ContactMessageViewSet(viewsets.ViewSet):
     def get_permissions(self):
         if self.action == 'create':
             return [permissions.AllowAny()]
-        return [permissions.IsAdminUser()]
+        return [SimpleAdminPermission()]
 
-class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all().order_by('-created_at')
-    serializer_class = ProductSerializer
+    def create(self, request):
+        msg = data_manager.add_message(request.data)
+        return Response(msg, status=status.HTTP_201_CREATED)
+
+    def list(self, request):
+        return Response(data_manager.get_messages())
+
+class ProductViewSet(viewsets.ViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
-        return [permissions.IsAdminUser()]
+        return [SimpleAdminPermission()]
 
-    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAdminUser])
+    def list(self, request):
+        return Response(data_manager.get_products())
+
+    def retrieve(self, request, pk=None):
+        products = data_manager.get_products()
+        product = next((p for p in products if str(p['id']) == str(pk)), None)
+        if product:
+            return Response(product)
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def create(self, request):
+        products = data_manager.get_products()
+        new_product = request.data.dict() if hasattr(request.data, 'dict') else request.data
+        new_product['id'] = max([p['id'] for p in products] + [0]) + 1
+        products.append(new_product)
+        data_manager.save_data('products.json', products)
+        return Response(new_product, status=status.HTTP_201_CREATED)
+
+    def update(self, request, pk=None):
+        products = data_manager.get_products()
+        new_data = request.data.dict() if hasattr(request.data, 'dict') else request.data
+        for i, p in enumerate(products):
+            if str(p['id']) == str(pk):
+                products[i].update(new_data)
+                data_manager.save_data('products.json', products)
+                return Response(products[i])
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def destroy(self, request, pk=None):
+        products = data_manager.get_products()
+        products = [p for p in products if str(p['id']) != str(pk)]
+        data_manager.save_data('products.json', products)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['patch'], permission_classes=[SimpleAdminPermission])
     def stock(self, request, pk=None):
-        product = self.get_object()
+        products = data_manager.get_products()
         stock_quantity = request.data.get('stock_quantity')
-        if stock_quantity is not None:
-            product.stock_quantity = stock_quantity
-            product.save()
-            return Response({'status': 'stock updated', 'stock_quantity': product.stock_quantity})
-        return Response({'error': 'stock_quantity is required'}, status=status.HTTP_400_BAD_REQUEST)
+        for i, p in enumerate(products):
+            if str(p['id']) == str(pk):
+                products[i]['stock_quantity'] = int(stock_quantity)
+                data_manager.save_data('products.json', products)
+                return Response({'status': 'stock updated', 'stock_quantity': products[i]['stock_quantity']})
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
 
-class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.select_related('user').prefetch_related('items', 'items__product').all().order_by('-created_at')
-    serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated]
+class OrderViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
 
-    def get_queryset(self):
-        base_qs = Order.objects.select_related('user').prefetch_related('items', 'items__product')
-        if self.request.user.is_staff:
-            return base_qs.all().order_by('-created_at')
-        return base_qs.filter(user=self.request.user).order_by('-created_at')
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-    @action(detail=False, methods=['get'], url_path='my-orders')
-    def my_orders(self, request):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAdminUser])
-    def stats(self, request):
-        from django.db.models import Sum
-        from django.contrib.auth.models import User
+    def create(self, request):
+        order_data = request.data
+        data_manager.add_order(order_data)
         
-        total_revenue = Order.objects.aggregate(total=Sum('total_amount'))['total'] or 0
-        total_orders = Order.objects.count()
-        total_products = Product.objects.count()
-        total_users = User.objects.count()
+        items_str = ""
+        total = 0
+        customer_name = order_data.get('customer_name', 'Guest')
+        phone = order_data.get('phone', 'N/A')
+        address = order_data.get('delivery_address', 'N/A')
+
+        for item in order_data.get('items', []):
+            quantity = item.get('quantity', 1)
+            name = item.get('name', 'Product')
+            price = item.get('price_at_purchase', item.get('price', 0))
+            items_str += f"- {name} x{quantity} (${price}/kg)\n"
+            total += float(price) * int(quantity)
         
-        # Get recent 5 orders with optimized queries
-        recent_orders_qs = Order.objects.select_related('user').all().order_by('-created_at')[:5]
-        from .serializers import OrderSerializer
-        recent_orders = OrderSerializer(recent_orders_qs, many=True).data
-
-        # Get low stock products
-        low_stock = Product.objects.filter(stock_quantity__lt=models.F('low_stock_threshold')).values('id', 'name', 'stock_quantity')
-
+        wa_message = f"📦 *New Order from Seaman Fresh*\n👤 {customer_name}\n📍 {address}\n🛒 Items:\n{items_str}\n💰 Total: ${total:.2f}\nPlease confirm!"
+        wa_link = f"https://wa.me/919000000000?text={urllib.parse.quote(wa_message)}"
+        
         return Response({
-            "total_revenue": float(total_revenue),
-            "total_orders": total_orders,
-            "total_products": total_products,
-            "total_users": total_users,
-            "recent_orders": recent_orders,
-            "low_stock_products": list(low_stock)
+            "status": "success",
+            "message": "Order Received via WhatsApp Link.",
+            "whatsapp_link": wa_link
+        }, status=status.HTTP_201_CREATED)
+
+    def list(self, request):
+        if SimpleAdminPermission().has_permission(request, self):
+            return Response(data_manager.get_orders())
+        return Response([], status=status.HTTP_403_FORBIDDEN)
+
+    @action(detail=False, methods=['get'], permission_classes=[SimpleAdminPermission])
+    def stats(self, request):
+        products = data_manager.get_products()
+        orders = data_manager.get_orders()
+        total_revenue = sum(float(o.get('total_amount', 0)) for o in orders)
+        
+        return Response({
+            "total_revenue": total_revenue,
+            "total_orders": len(orders),
+            "total_products": len(products),
+            "total_users": 0,
+            "recent_orders": orders[-5:],
+            "low_stock_products": [p for p in products if int(p.get('stock_quantity', 0)) < int(p.get('low_stock_threshold', 5))]
         })
-
-    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAdminUser])
-    def analytics(self, request):
-        from django.db.models import Sum
-        from django.db.models.functions import TruncDate
-        
-        # Get last 7 days of revenue
-        data = Order.objects.annotate(
-            displayDate=TruncDate('created_at')
-        ).values('displayDate').annotate(
-            revenue=Sum('total_amount')
-        ).order_by('displayDate')
-        
-        # Format for frontend
-        formatted_data = [
-            {
-                "displayDate": item['displayDate'].strftime('%b %d'),
-                "revenue": float(item['revenue'])
-            } for item in data
-        ]
-        
-        return Response(formatted_data)
-
-    @action(detail=True, methods=['put'], permission_classes=[permissions.IsAdminUser])
-    def status(self, request, pk=None):
-        order = self.get_object()
-        new_status = request.data.get('status')
-        if new_status:
-            order.status = new_status
-            order.save()
-            return Response({'status': 'order status updated', 'new_status': order.status})
-        return Response({'error': 'status is required'}, status=status.HTTP_400_BAD_REQUEST)
 
 class PingView(APIView):
     permission_classes = [permissions.AllowAny]
     def get(self, request):
-        return Response({"status": "ok", "message": "Server is awake"})
+        return Response({"status": "ok", "message": "Serverless & DB-Free Backend Alive"})
 
 class AIChatView(APIView):
     permission_classes = [permissions.AllowAny]
-    
     def post(self, request):
         query = request.data.get('query', '').lower()
-        if not query:
-            return Response({"response": "I didn't catch that. How can I help?"})
-            
-        print(f"[AI Chat] Processing query: {query}")
+        if not query: return Response({"response": "I didn't catch that."})
         
-        response_text = ""
-        extras = {}
-        
-        # Simple Intent Detection
-        if any(word in query for word in ['fish', 'product', 'catalog', 'buy', 'stock']):
-            # Optimization: Search directly in DB
-            from django.db.models import Q
-            matched_product = Product.objects.filter(
-                Q(name__icontains=query) | Q(category__icontains=query)
-            ).first()
+        products = data_manager.get_products()
+        matched_product = next((p for p in products if query in p['name'].lower() or query in p['category'].lower()), None)
 
-            if matched_product:
-                response_text = f"We have fresh {matched_product.name} available for ${matched_product.price}/kg. Would you like to see it?"
-                extras['product'] = {
-                    'id': matched_product.id,
-                    'name': matched_product.name,
-                    'price': matched_product.price,
-                    'image': matched_product.image.url if matched_product.image else None,
-                    'category': matched_product.category
-                }
-            else:
-                response_text = "We have a wide variety of fresh fish! You can check our products page or ask about a specific one like Salmon or Tuna."
-        
-        elif any(word in query for word in ['recipe', 'cook', 'make', 'eat']):
-            response_text = "I have some great recipes! For example, Pan-Seared Salmon or Garlic Butter Shrimp. Which fish are you planning to cook?"
-            
-        elif any(word in query for word in ['delivery', 'ship', 'track', 'time']):
-            response_text = "Experience 24-hour global delivery! We use temperature-controlled logistics to ensure maximum freshness."
-            
+        if matched_product:
+            response_text = f"We have fresh {matched_product['name']} available for ${matched_product['price']}/kg."
+            extras = {'product': matched_product}
         else:
-            response_text = "Ahoy! 🌊 I'm still learning, but I can help you find products, recipes, or track your delivery. What's on your mind?"
+            response_text = "I'm still learning about our products. How else can I help?"
+            extras = {}
             
-        return Response({
-            "response": response_text,
-            "extras": extras
-        })
+        return Response({"response": response_text, "extras": extras})

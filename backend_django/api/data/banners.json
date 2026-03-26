@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "title": "Fresh Catch of the Day",
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&q=80&w=1200&h=400",
+        "link_url": "/products",
+        "active": true
+    },
+    {
+        "id": 2,
+        "title": "Free Delivery on Orders Over $50",
+        "image": "https://images.unsplash.com/photo-1544378730-8b5104b18790?auto=format&fit=crop&q=80&w=1200&h=400",
+        "link_url": "/offers",
+        "active": true
+    }
+]

@@ -1,0 +1,847 @@
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\manage.py
+================================================================================
+
+#!/usr/bin/env python
+"""Django's command-line utility for administrative tasks."""
+import os
+import sys
+
+
+def main():
+    """Run administrative tasks."""
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+    try:
+        from django.core.management import execute_from_command_line
+    except ImportError as exc:
+        raise ImportError(
+            "Couldn't import Django. Are you sure it's installed and "
+            "available on your PYTHONPATH environment variable? Did you "
+            "forget to activate a virtual environment?"
+        ) from exc
+    execute_from_command_line(sys.argv)
+
+
+if __name__ == '__main__':
+    main()
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\zappa_settings.json
+================================================================================
+
+{
+    "dev": {
+        "django_settings": "core.settings",
+        "profile_name": "default",
+        "project_name": "seaman-fresh",
+        "runtime": "python3.11",
+        "s3_bucket": "zappa-seaman-fresh-deployments",
+        "aws_region": "us-east-1",
+        "environment_variables": {
+            "USE_S3": "TRUE",
+            "DEBUG": "False",
+            "DATABASE_URL": "postgresql://neondb_owner:npg_CWKchSwm90Yy@ep-red-smoke-ah247bnx-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require",
+            "DJANGO_SECRET_KEY": "django-insecure-zappa-deployment-key-change-me",
+            "AWS_STORAGE_BUCKET_NAME": "zappa-seaman-fresh-deployments",
+            "ALLOWED_HOSTS": "*"
+        }
+    },
+    "prod": {
+        "django_settings": "core.settings",
+        "profile_name": "default",
+        "project_name": "seaman-fresh",
+        "runtime": "python3.11",
+        "s3_bucket": "zappa-seaman-fresh-deployments",
+        "aws_region": "us-east-1",
+        "environment_variables": {
+            "USE_S3": "FALSE",
+            "DEBUG": "False",
+            "DJANGO_SECRET_KEY": "seaman-fresh-stateless-prod-key-2024",
+            "ADMIN_USER": "admin",
+            "ADMIN_PASS": "seaman123",
+            "ADMIN_SECRET_TOKEN": "seaman_fresh_admin_2024",
+            "ALLOWED_HOSTS": "*"
+        }
+    }
+}
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\admin.py
+================================================================================
+
+# This file is now empty as the project is database-free and uses JSON storage.
+# The internal Django admin has been removed.
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\backends.py
+================================================================================
+
+from django.contrib.auth.backends import ModelBackend
+from django.contrib.auth import get_user_model
+from django.db.models import Q
+
+class EmailOrUsernameModelBackend(ModelBackend):
+    """
+    Custom authentication backend that allows users to log in using either 
+    their username or email address.
+    """
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        UserModel = get_user_model()
+        if username is None:
+            username = kwargs.get(UserModel.USERNAME_FIELD)
+        
+        try:
+            # Try to find the user by username OR email
+            user = UserModel.objects.get(Q(username__iexact=username) | Q(email__iexact=username))
+        except UserModel.DoesNotExist:
+            return None
+        else:
+            if user.check_password(password) and self.user_can_authenticate(user):
+                return user
+        return None
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\data_manager.py
+================================================================================
+
+import json
+import os
+from django.conf import settings
+
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+
+def _get_path(filename):
+    return os.path.join(DATA_DIR, filename)
+
+def load_data(filename):
+    path = _get_path(filename)
+    if not os.path.exists(path):
+        return []
+    with open(path, 'r', encoding='utf-8') as f:
+        try:
+            return json.load(f)
+        except json.JSONDecodeError:
+            return []
+
+def save_data(filename, data):
+    path = _get_path(filename)
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4)
+
+def get_products():
+    return load_data('products.json')
+
+def get_banners():
+    return load_data('banners.json')
+
+def get_messages():
+    return load_data('messages.json')
+
+def add_message(message):
+    messages = get_messages()
+    message['id'] = len(messages) + 1
+    messages.append(message)
+    save_data('messages.json', messages)
+    return message
+
+def get_orders():
+    return load_data('orders.json')
+
+def add_order(order_data):
+    orders = get_orders()
+    order_data['id'] = len(orders) + 1
+    # For WhatsApp integration, we just format the order and return the message string
+    orders.append(order_data)
+    save_data('orders.json', orders)
+    return order_data
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\models.py
+================================================================================
+
+# This file is now empty as the project is database-free and uses JSON storage.
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\permissions.py
+================================================================================
+
+import os
+from rest_framework import permissions
+
+class SimpleAdminPermission(permissions.BasePermission):
+    """
+    Check for a secret key in the Authorization header.
+    Format: 'Bearer <SECRET_ADMIN_TOKEN>'
+    """
+    def has_permission(self, request, view):
+        # In a real "database-free" production app, this would be an ENV variable
+        admin_token = os.getenv('ADMIN_SECRET_TOKEN', 'seaman_fresh_admin_2024')
+        
+        auth_header = request.headers.get('Authorization', '')
+        if auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+            return token == admin_token
+        
+        return False
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\serializers.py
+================================================================================
+
+# This file is now empty as the project is database-free and uses JSON storage.
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\urls.py
+================================================================================
+
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import (
+    ProductViewSet, OrderViewSet, BannerViewSet, 
+    ContactMessageViewSet, MockLoginView, PingView, AIChatView
+)
+
+router = DefaultRouter()
+router.register(r'products', ProductViewSet, basename='product')
+router.register(r'orders', OrderViewSet, basename='order')
+router.register(r'banners', BannerViewSet, basename='banner')
+router.register(r'messages', ContactMessageViewSet, basename='message')
+
+urlpatterns = [
+    path('ping/', PingView.as_view(), name='ping'),
+    path('ai-chat/', AIChatView.as_view(), name='ai_chat'),
+    path('auth/login/', MockLoginView.as_view(), name='login'),
+    path('', include(router.urls)),
+]
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\views.py
+================================================================================
+
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from . import data_manager
+from .permissions import SimpleAdminPermission
+import urllib.parse
+import os
+
+class MockLoginView(APIView):
+    """
+    Stateless login - just checks for a hardcoded password in .env or default.
+    Useful for 'Database-Free' administration.
+    """
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        
+        # Hardcoded for DB-free mode
+        ADMIN_USER = os.getenv('ADMIN_USER', 'admin')
+        ADMIN_PASS = os.getenv('ADMIN_PASS', 'seaman123')
+        SECRET_TOKEN = os.getenv('ADMIN_SECRET_TOKEN', 'seaman_fresh_admin_2024')
+
+        if username == ADMIN_USER and password == ADMIN_PASS:
+            return Response({
+                "access": SECRET_TOKEN,
+                "user": {
+                    "username": ADMIN_USER,
+                    "is_staff": True,
+                    "name": "Seaman Admin"
+                }
+            })
+        return Response({"error": "Invalid credentials for DB-free mode"}, status=status.HTTP_401_UNAUTHORIZED)
+
+class BannerViewSet(viewsets.ViewSet):
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [SimpleAdminPermission()]
+    
+    def list(self, request):
+        return Response(data_manager.get_banners())
+
+    def create(self, request):
+        banners = data_manager.get_banners()
+        new_banner = request.data
+        new_banner['id'] = len(banners) + 1
+        banners.append(new_banner)
+        data_manager.save_data('banners.json', banners)
+        return Response(new_banner, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, pk=None):
+        banners = data_manager.get_banners()
+        banners = [b for b in banners if str(b['id']) != str(pk)]
+        data_manager.save_data('banners.json', banners)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ContactMessageViewSet(viewsets.ViewSet):
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        return [SimpleAdminPermission()]
+
+    def create(self, request):
+        msg = data_manager.add_message(request.data)
+        return Response(msg, status=status.HTTP_201_CREATED)
+
+    def list(self, request):
+        return Response(data_manager.get_messages())
+
+class ProductViewSet(viewsets.ViewSet):
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [SimpleAdminPermission()]
+
+    def list(self, request):
+        return Response(data_manager.get_products())
+
+    def retrieve(self, request, pk=None):
+        products = data_manager.get_products()
+        product = next((p for p in products if str(p['id']) == str(pk)), None)
+        if product:
+            return Response(product)
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def create(self, request):
+        products = data_manager.get_products()
+        new_product = request.data.dict() if hasattr(request.data, 'dict') else request.data
+        new_product['id'] = max([p['id'] for p in products] + [0]) + 1
+        products.append(new_product)
+        data_manager.save_data('products.json', products)
+        return Response(new_product, status=status.HTTP_201_CREATED)
+
+    def update(self, request, pk=None):
+        products = data_manager.get_products()
+        new_data = request.data.dict() if hasattr(request.data, 'dict') else request.data
+        for i, p in enumerate(products):
+            if str(p['id']) == str(pk):
+                products[i].update(new_data)
+                data_manager.save_data('products.json', products)
+                return Response(products[i])
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def destroy(self, request, pk=None):
+        products = data_manager.get_products()
+        products = [p for p in products if str(p['id']) != str(pk)]
+        data_manager.save_data('products.json', products)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['patch'], permission_classes=[SimpleAdminPermission])
+    def stock(self, request, pk=None):
+        products = data_manager.get_products()
+        stock_quantity = request.data.get('stock_quantity')
+        for i, p in enumerate(products):
+            if str(p['id']) == str(pk):
+                products[i]['stock_quantity'] = int(stock_quantity)
+                data_manager.save_data('products.json', products)
+                return Response({'status': 'stock updated', 'stock_quantity': products[i]['stock_quantity']})
+        return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class OrderViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request):
+        order_data = request.data
+        data_manager.add_order(order_data)
+        
+        items_str = ""
+        total = 0
+        customer_name = order_data.get('customer_name', 'Guest')
+        phone = order_data.get('phone', 'N/A')
+        address = order_data.get('delivery_address', 'N/A')
+
+        for item in order_data.get('items', []):
+            quantity = item.get('quantity', 1)
+            name = item.get('name', 'Product')
+            price = item.get('price_at_purchase', item.get('price', 0))
+            items_str += f"- {name} x{quantity} (${price}/kg)\n"
+            total += float(price) * int(quantity)
+        
+        wa_message = f"📦 *New Order from Seaman Fresh*\n👤 {customer_name}\n📍 {address}\n🛒 Items:\n{items_str}\n💰 Total: ${total:.2f}\nPlease confirm!"
+        wa_link = f"https://wa.me/919000000000?text={urllib.parse.quote(wa_message)}"
+        
+        return Response({
+            "status": "success",
+            "message": "Order Received via WhatsApp Link.",
+            "whatsapp_link": wa_link
+        }, status=status.HTTP_201_CREATED)
+
+    def list(self, request):
+        if SimpleAdminPermission().has_permission(request, self):
+            return Response(data_manager.get_orders())
+        return Response([], status=status.HTTP_403_FORBIDDEN)
+
+    @action(detail=False, methods=['get'], permission_classes=[SimpleAdminPermission])
+    def stats(self, request):
+        products = data_manager.get_products()
+        orders = data_manager.get_orders()
+        total_revenue = sum(float(o.get('total_amount', 0)) for o in orders)
+        
+        return Response({
+            "total_revenue": total_revenue,
+            "total_orders": len(orders),
+            "total_products": len(products),
+            "total_users": 0,
+            "recent_orders": orders[-5:],
+            "low_stock_products": [p for p in products if int(p.get('stock_quantity', 0)) < int(p.get('low_stock_threshold', 5))]
+        })
+
+class PingView(APIView):
+    permission_classes = [permissions.AllowAny]
+    def get(self, request):
+        return Response({"status": "ok", "message": "Serverless & DB-Free Backend Alive"})
+
+class AIChatView(APIView):
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        query = request.data.get('query', '').lower()
+        if not query: return Response({"response": "I didn't catch that."})
+        
+        products = data_manager.get_products()
+        matched_product = next((p for p in products if query in p['name'].lower() or query in p['category'].lower()), None)
+
+        if matched_product:
+            response_text = f"We have fresh {matched_product['name']} available for ${matched_product['price']}/kg."
+            extras = {'product': matched_product}
+        else:
+            response_text = "I'm still learning about our products. How else can I help?"
+            extras = {}
+            
+        return Response({"response": response_text, "extras": extras})
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\__init__.py
+================================================================================
+
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\data\banners.json
+================================================================================
+
+[
+    {
+        "id": 1,
+        "title": "Fresh Catch of the Day",
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&q=80&w=1200&h=400",
+        "link_url": "/products",
+        "active": true
+    },
+    {
+        "id": 2,
+        "title": "Free Delivery on Orders Over $50",
+        "image": "https://images.unsplash.com/photo-1544378730-8b5104b18790?auto=format&fit=crop&q=80&w=1200&h=400",
+        "link_url": "/offers",
+        "active": true
+    }
+]
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\data\products.json
+================================================================================
+
+[
+    {
+        "id": 1,
+        "name": "Fresh Atlantic Salmon",
+        "description": "Premium quality Atlantic Salmon, rich in Omega-3.",
+        "price": 24.99,
+        "category": "Fish",
+        "stock_quantity": 50,
+        "image": "https://images.unsplash.com/photo-1594005254530-5fed29ffb888?auto=format&fit=crop&q=80&w=300",
+        "low_stock_threshold": 10,
+        "discount_percent": 0
+    },
+    {
+        "id": 2,
+        "name": "Yellowfin Tuna",
+        "description": "Sashimi grade Yellowfin Tuna steaks.",
+        "price": 32.50,
+        "category": "Fish",
+        "stock_quantity": 30,
+        "image": "https://images.unsplash.com/photo-1534604973900-c41ab4c5d4b0?auto=format&fit=crop&q=80&w=300",
+        "low_stock_threshold": 5,
+        "discount_percent": 10
+    },
+    {
+        "id": 3,
+        "name": "King Prawns",
+        "description": "Large, juicy King Prawns, perfect for grilling.",
+        "price": 18.00,
+        "category": "Shellfish",
+        "stock_quantity": 100,
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&q=80&w=300",
+        "low_stock_threshold": 20,
+        "discount_percent": 0
+    }
+]
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\api\migrations\__init__.py
+================================================================================
+
+ 
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\core\asgi.py
+================================================================================
+
+import os
+from django.core.asgi import get_asgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+
+application = get_asgi_application()
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\core\settings.py
+================================================================================
+
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+import dj_database_url
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', os.getenv('JWT_SECRET', 'django-insecure-default-key'))
+
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.pythonanywhere.com').split(',')
+
+INSTALLED_APPS = [
+    'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
+    'api',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174').split(',')
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    "DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT",
+]
+CORS_ALLOW_HEADERS = [
+    "accept", "accept-encoding", "authorization", "content-type", 
+    "dnt", "origin", "user-agent", "x-csrftoken", "x-requested-with",
+]
+
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:5173,http://localhost:5174').split(',')
+
+ROOT_URLCONF = 'core.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'core.wsgi.application'
+
+# NO DATABASE: Everything is now JSON-based in this serverless architecture
+DATABASES = {}
+
+AUTH_PASSWORD_VALIDATORS = []
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+USE_S3 = os.getenv('USE_S3') == 'TRUE'
+
+if USE_S3:
+    # aws settings
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    
+    # s3 static settings
+    STATIC_LOCATION = 'static'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+    
+    # s3 media settings
+    MEDIA_LOCATION = 'media'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
+    
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3Boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": MEDIA_LOCATION,
+                "file_overwrite": False,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3Boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": STATIC_LOCATION,
+            },
+        },
+    }
+else:
+    STATIC_URL = 'static/'
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\core\urls.py
+================================================================================
+
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('api/', include('api.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\core\wsgi.py
+================================================================================
+
+import os
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+
+application = get_wsgi_application()
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\core\__init__.py
+================================================================================
+
+
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\static\admin\css\custom_admin.css
+================================================================================
+
+/* Seaman Fresh Elite Admin Styling */
+:root {
+    --primary: #0EA5E9;
+    --primary-dark: #0284C7;
+    --midnight: #0F172A;
+    --slate-700: #334155;
+    --slate-800: #1E293B;
+    --slate-900: #0F172A;
+    --white: #ffffff;
+}
+
+/* Header & Brand */
+#header {
+    background: var(--midnight) !important;
+    color: var(--white) !important;
+    padding: 15px 40px !important;
+    border-bottom: 2px solid var(--primary) !important;
+}
+
+#branding h1 {
+    color: var(--white) !important;
+    font-weight: 900 !important;
+    letter-spacing: -1px !important;
+    text-transform: uppercase !important;
+}
+
+#branding h1 a {
+    color: var(--white) !important;
+}
+
+#branding h1 span {
+    color: var(--primary) !important;
+}
+
+/* Sidebar & Navigation */
+.module h2,
+.module caption,
+.inline-group h2 {
+    background: var(--slate-800) !important;
+    color: var(--primary) !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-size: 11px !important;
+}
+
+div.breadcrumbs {
+    background: var(--white) !important;
+    border-bottom: 1px solid #eee !important;
+    padding: 10px 40px !important;
+    font-size: 12px !important;
+}
+
+/* Buttons */
+.button,
+input[type=submit],
+input[type=button],
+.submit-row input,
+a.button {
+    background: var(--midnight) !important;
+    border-radius: 8px !important;
+    padding: 10px 20px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+}
+
+.button:hover,
+input[type=submit]:hover,
+input[type=button]:hover {
+    background: var(--primary) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
+}
+
+.button.default,
+input[type=submit].default {
+    background: var(--primary) !important;
+}
+
+.button.default:hover,
+input[type=submit].default:hover {
+    background: var(--primary-dark) !important;
+}
+
+/* Form Elements */
+input[type=text],
+input[type=password],
+input[type=email],
+input[type=url],
+input[type=number],
+textarea,
+select {
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 10px !important;
+    transition: all 0.2s ease !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary) !important;
+    outline: 2px solid var(--primary) !important;
+    outline-offset: -2px !important;
+}
+
+/* Table */
+table thead th {
+    background: #f8fafc !important;
+    color: var(--slate-700) !important;
+    font-weight: 800 !important;
+}
+
+/* Dashboard Modules */
+.module {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: 1px solid #eee !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 25px !important;
+}
+
+/* User Links */
+#user-tools {
+    font-weight: 600 !important;
+}
+
+#user-tools a {
+    color: var(--primary) !important;
+    transition: opacity 0.2s !important;
+}
+
+#user-tools a:hover {
+    opacity: 0.8 !important;
+}
+
+================================================================================
+FILE: c:\enosh\Enosh\smf\backend_django\templates\admin\base_site.html
+================================================================================
+
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Seaman Fresh Global Management{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom_admin.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+    body { font-family: 'Inter', sans-serif !important; }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        SEAMAN <span>FRESH</span> ELITE
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
