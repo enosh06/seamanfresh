@@ -17,7 +17,7 @@ class MockLoginView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         
-        # Hardcoded for DB-free mode
+        # Hardcoded for DB-free mode (Default Admin)
         ADMIN_USER = os.getenv('ADMIN_USER', 'admin')
         ADMIN_PASS = os.getenv('ADMIN_PASS', 'seaman123')
         SECRET_TOKEN = os.getenv('ADMIN_SECRET_TOKEN', 'seaman_fresh_admin_2024')
@@ -31,7 +31,53 @@ class MockLoginView(APIView):
                     "name": "Seaman Admin"
                 }
             })
+        
+        # Also check users.json for registered users
+        users = data_manager.get_users()
+        user = next((u for u in users if u.get('username') == username or u.get('email') == username), None)
+        
+        if user and user.get('password') == password:
+            return Response({
+                "access": SECRET_TOKEN, # Simple token reuse for mock
+                "user": {
+                    "username": user['username'],
+                    "is_staff": user.get('is_staff', False),
+                    "name": user.get('name', user['username'])
+                }
+            })
+            
         return Response({"error": "Invalid credentials for DB-free mode"}, status=status.HTTP_401_UNAUTHORIZED)
+
+class MockRegisterView(APIView):
+    """
+    Stateless register - saves to users.json to allow frontend flow.
+    """
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        SECRET_TOKEN = os.getenv('ADMIN_SECRET_TOKEN', 'seaman_fresh_admin_2024')
+        user_data = request.data
+        
+        # Logic to save to users.json
+        new_user = {
+            "username": user_data.get('username', user_data.get('email', 'new_user')),
+            "email": user_data.get('email', 'new_user@example.com'),
+            "password": user_data.get('password', 'password123'),
+            "is_staff": False,
+            "name": user_data.get('name', 'New User')
+        }
+        
+        data_manager.add_user(new_user)
+        
+        return Response({
+            "token": SECRET_TOKEN,
+            "user": {
+                "username": new_user['username'],
+                "email": new_user['email'],
+                "is_staff": False,
+                "name": new_user['name']
+            },
+            "message": "Registration successful (Mock Mode)"
+        }, status=status.HTTP_201_CREATED)
 
 class BannerViewSet(viewsets.ViewSet):
     def get_permissions(self):

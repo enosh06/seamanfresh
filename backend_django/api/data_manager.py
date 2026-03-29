@@ -48,3 +48,13 @@ def add_order(order_data):
     orders.append(order_data)
     save_data('orders.json', orders)
     return order_data
+
+def get_users():
+    return load_data('users.json')
+
+def add_user(user_data):
+    users = get_users()
+    user_data['id'] = len(users) + 1
+    users.append(user_data)
+    save_data('users.json', users)
+    return user_data

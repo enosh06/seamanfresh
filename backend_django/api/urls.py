@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     ProductViewSet, OrderViewSet, BannerViewSet, 
-    ContactMessageViewSet, MockLoginView, PingView, AIChatView
+    ContactMessageViewSet, MockLoginView, MockRegisterView, PingView, AIChatView
 )
 
 router = DefaultRouter()
@@ -15,5 +15,6 @@ urlpatterns = [
     path('ping/', PingView.as_view(), name='ping'),
     path('ai-chat/', AIChatView.as_view(), name='ai_chat'),
     path('auth/login/', MockLoginView.as_view(), name='login'),
+    path('auth/register/', MockRegisterView.as_view(), name='register'),
     path('', include(router.urls)),
 ]

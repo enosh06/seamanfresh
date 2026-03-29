@@ -2,13 +2,19 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { LayoutDashboard, User, Lock, ExternalLink } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../config';
+import { API_URL, ADMIN_URL } from '../config';
 
 const FixedPanelLink = () => {
     const { user } = useAuth();
 
     const getLinkData = () => {
         if (!user) return { to: '/login', icon: <Lock size={24} />, label: 'Login', external: false };
+        
+        // If user is admin, link to the actual Admin Panel (External Port 5174)
+        if (user.role === 'admin' || user.is_staff) {
+            return { to: ADMIN_URL, icon: <LayoutDashboard size={24} />, label: 'Admin Panel', external: true };
+        }
+        
         return { to: '/dashboard', icon: <User size={24} />, label: 'My Panel', external: false };
     };
 

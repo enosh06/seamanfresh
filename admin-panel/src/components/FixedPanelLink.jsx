@@ -11,10 +11,10 @@ const FixedPanelLink = () => {
                 position: 'fixed',
                 bottom: '30px',
                 left: '30px',
-                width: '60px',
-                height: '60px',
-                background: '#0B0B0B',
-                color: 'white',
+                width: '72px',
+                height: '72px',
+                background: '#0F172A', // Match client dark navy
+                color: '#0EA5E9',      // Match client sky blue
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',

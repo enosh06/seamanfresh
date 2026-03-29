@@ -1,0 +1,18 @@
+[
+    {
+        "username": "final_check",
+        "email": "final@test.com",
+        "password": "password123",
+        "is_staff": false,
+        "name": "Final Check User",
+        "id": 1
+    },
+    {
+        "username": "final_demo",
+        "email": "demo@test.com",
+        "password": "password123",
+        "is_staff": false,
+        "name": "Final Demo User",
+        "id": 2
+    }
+]
