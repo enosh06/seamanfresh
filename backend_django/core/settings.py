@@ -31,12 +31,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = os.getenv(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,'
-    'https://seaman-fresh-client.netlify.app,https://seaman-fresh-admin.netlify.app,'
-    'https://seaman-fresh-client.pages.dev,https://seaman-fresh-admin.pages.dev'
-).split(',')
+_default_cors = [
+    'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5174', 'http://127.0.0.1:5174',
+    'https://seaman-fresh-client.netlify.app', 'https://seaman-fresh-admin.netlify.app',
+    'https://seaman-fresh-client.pages.dev', 'https://seaman-fresh-admin.pages.dev'
+]
+_env_cors = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
+CORS_ALLOWED_ORIGINS = list(set(_default_cors + [o for o in _env_cors if o]))
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     "DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT",
@@ -46,12 +47,13 @@ CORS_ALLOW_HEADERS = [
     "dnt", "origin", "user-agent", "x-csrftoken", "x-requested-with",
 ]
 
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    'CSRF_TRUSTED_ORIGINS',
-    'http://localhost:5173,http://localhost:5174,'
-    'https://seaman-fresh-client.netlify.app,https://seaman-fresh-admin.netlify.app,'
-    'https://seaman-fresh-client.pages.dev,https://seaman-fresh-admin.pages.dev'
-).split(',')
+_default_csrf = [
+    'http://localhost:5173', 'http://localhost:5174',
+    'https://seaman-fresh-client.netlify.app', 'https://seaman-fresh-admin.netlify.app',
+    'https://seaman-fresh-client.pages.dev', 'https://seaman-fresh-admin.pages.dev'
+]
+_env_csrf = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+CSRF_TRUSTED_ORIGINS = list(set(_default_csrf + [o for o in _env_csrf if o]))
 
 ROOT_URLCONF = 'core.urls'
 
